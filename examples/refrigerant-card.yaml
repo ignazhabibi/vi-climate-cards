@@ -1,4 +1,4 @@
-# Refrigerant circuit card, used in view `anlage` of dashboard-heizung.
+# Refrigerant circuit card, used in view `diagnose` of dashboard-heizung.
 type: custom:vi-refrigerant-card
 grid_options:
   columns: full

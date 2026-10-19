@@ -104,7 +104,7 @@ The test page cannot load the MDI font inside the stubbed `ha-icon`, so icons
 show as squares there. That is expected.
 
 After deploying, check the live view in the browser pane at
-`http://192.168.9.29:8123/dashboard-heizung/anlage` (refrigerant card) and
+`http://192.168.9.29:8123/dashboard-heizung/diagnose` (refrigerant card) and
 `/dashboard-heizung/uebersicht` (hydraulic card). The user logs in there;
 never enter credentials yourself.
 

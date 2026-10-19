@@ -20,20 +20,27 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
     animations off: all 80 are pixel-identical. With animations on, only
     the moving parts differ, because a screenshot catches them in a random
     phase.
-- Not deployed yet. Home Assistant still runs the former build in resource
-  `a94feedfed44424592ffb50bf9328be2`, and the dashboards use the former card
-  types. Nothing is committed yet.
-- Design history, Home Assistant setup (dashboards, views, header model), and
-  domain notes are in `docs/history.md`; they still apply.
+- Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
+  build `0.1.0+1fdb53d` (48,978 bytes, djb2 4199979991, checked in the
+  browser against the local file). `dashboard-heizung` uses the new card
+  types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
+  `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
+  views were checked live (rendering, no error cards, no console errors,
+  a badge tap opens its more-info dialog).
+- The dashboard changed since `docs/history.md`: it now has only the views
+  `uebersicht` and `diagnose`; the former view `anlage` is gone and the
+  refrigerant card sits in `diagnose` next to Kennwerte, Verdichter, and
+  Heizstab tiles. No other dashboard uses the cards (the default dashboard
+  has no stored config).
+- Design history, the former Home Assistant setup (header model, entity
+  names), and domain notes are in `docs/history.md`; they still apply apart
+  from the view layout above.
 
 ## Next Steps
 
-1. Commit the port (after the user's go-ahead).
-2. Switch the deployment: update the resource with `dist/vi-climate-cards.js`
-   (the aliases keep the former card types working), check both views live,
-   then change the card types in `dashboard-heizung` views `uebersicht` and
-   `anlage` to the new names. Remove the aliases once no dashboard uses them.
-3. Cleanup from the review (2026-10-19):
+1. Remove the aliases for the former card names (`index.ts`): no dashboard
+   uses them any more.
+2. Cleanup from the review (2026-10-19):
    - Remove the unused round status dots (`dots`, `.dot`): no layout has any.
    - Decide with the user whether the `status` template header stays; no view
      uses it since step 22 in `docs/history.md`.
@@ -44,7 +51,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
    - Start the minute timer only with `status_entity`.
    - Retire `test/parity.test.ts`, `test/compare-legacy.mjs`, and the fixture
      once the drawing changes on purpose; replace them with snapshot tests.
-4. Plan agreed with the user (own instance, built publish-ready):
+3. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
    - Entities found through the device and `translation_key`, `entities` only
      for overrides; list what the integration has to provide.

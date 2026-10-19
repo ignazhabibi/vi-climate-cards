@@ -21,9 +21,9 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+f575930` (54,808 bytes, djb2 1263936152, checked in the
-  browser against the local file), which includes the cleanup and the entity
-  discovery below. `dashboard-heizung` uses the new card
+  build `0.1.0+9b9aff8` (55,929 bytes, djb2 3172131696, checked in the
+  browser against the local file), which includes the cleanup, the entity
+  discovery, and the card editor below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
   `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
   views were checked live while the heat pump was heating (rendering, no
@@ -90,7 +90,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   (`heating.circuits.N.operating.modes.active`), so cards can tell several
   heating circuits apart; today only the unique ID holds the circuit.
 
-## Card editor (2026-10-19)
+## Card editor (2026-10-19, deployed)
 
 - `getConfigForm()` builds the visual editor from the slot tables
   (`src/card/editor.ts`): device (filtered to vi_climate_devices), header
@@ -101,6 +101,17 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - `getStubConfig()` returns `{}`; the picker entry has `preview: true`.
 - `entities` semantics: an entity overrides, `null` (`key:` in YAML) hides a
   part, an empty string (a cleared editor field) means automatic.
+- Checked live on HA 2026.10.2 without saving: the editor of the hydraulic
+  card shows the header entity, the info switch on for a card without `info`,
+  and the section with all 20 labelled fields; the device list holds only the
+  heat pump of Viessmann Climate Devices; switching the info off updates the
+  preview; the YAML view keeps all `status_items`, and opening the form adds
+  no keys. The picker finds both cards under "Viessmann" and renders their
+  previews with live values from discovery. The dashboard config was
+  unchanged afterwards.
+- HA's device picker shows no label while empty, only its placeholder
+  "Gerät auswählen" (the label "Wärmepumpe" is set and used as `aria-label`;
+  entity pickers do show theirs). The helper text below explains the field.
 
 ## Next Steps
 

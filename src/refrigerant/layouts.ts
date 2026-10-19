@@ -30,6 +30,10 @@ import { T } from "../i18n";
 
 const D = T.drawing;
 
+/** Öl and Motor stack as a pair this far apart: their 24px tap targets stay
+ * apart down to the narrowest card (scale 0.74). */
+const PAIR = 33;
+
 function wide() {
   // Heating: the liquid runs along the top from the condenser through
   // expansion valve 1, the internal heat exchanger, and expansion valve 2 into
@@ -167,9 +171,9 @@ function wide() {
     ["primary_supply", OUT_X, div(FAN1_Y + FAN2_Y, 2), D.primaryCircuit, "sm"], // on the Verdampfer row
     ["inverter_power", IX, INV_Y, D.inverter, "big"],
     ["compressor_speed", MX, ROW1, D.compressor, "big dk"],
-    // Öl on the Heißgas row, Motor close below as a pair.
+    // Öl on the Heißgas row, Motor below as a pair (PAIR).
     ["oil_temp", MX, ROW2, D.oil, "sm dk"],
-    ["motor_temp", MX, ROW2 + 22, D.motor, "sm dk"],
+    ["motor_temp", MX, ROW2 + PAIR, D.motor, "sm dk"],
   ];
   // Badges reach full size at the same card width as in the hydraulic
   // schematic, so both cards show them at one size.
@@ -306,7 +310,7 @@ function narrow() {
     ["inverter_power", INV[0] + div(INV[2], 2), INV[1] + div(INV[3], 2), D.inverter, "big"],
     ["compressor_speed", RX, CROW1, D.compressor, "big dk"],
     ["oil_temp", RX, CROW2, D.oil, "sm dk"],
-    ["motor_temp", RX, CROW2 + 22, D.motor, "sm dk"],
+    ["motor_temp", RX, CROW2 + PAIR, D.motor, "sm dk"],
   ];
   return layout({ name: "narrow rfn", w: W, h: H, defs, body, labels, badges, values, label: D.refrigerantCircuit });
 }

@@ -21,7 +21,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+fd914ea` (66,815 bytes, djb2 1464707642, checked in the
+  build `0.1.0+a44ae10` (66,821 bytes, djb2 2366622182, checked in the
   browser against the local file), which includes the cleanup, the entity
   discovery, the card editor, the plan items, and the review follow-up below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
@@ -175,16 +175,16 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   the state), headers show the detected state, the pause button switches to
   play and stops the motion (switched back), no console errors. The header
   line wraps one word earlier because of the second button.
-- The hydraulic card in `uebersicht` now carries
-  `device: bd5354237765b40a51fbb3d220ec3738` (saved between the 7603810 check
-  and this deploy, not by the agent); it equals the detected device, and
-  both cards still carry `status_entity`. Both could go (ask first).
-- Small values have 24 px tap targets. Open: "Öl" and "Motor" are 16–23 px
-  apart, so their targets overlap slightly; a full fix needs more spacing in
-  the refrigerant drawing (user to decide).
+- Small values have 24 px tap targets; "Öl" and "Motor" sit 33 units apart
+  (`PAIR` in the refrigerant layouts), so their targets stay apart down to
+  the narrowest card (36 px live).
+- Dashboard cleanup (2026-10-19, user's go-ahead "mach fertig"): `device`
+  and `status_entity` removed from both cards; each now holds only `type`,
+  `grid_options`, and `status_items`. Checked live: headers show the
+  detected state, 21 and 24 parts, no note, no console errors.
+- The darker inactive pipe gray stays for the user to judge live.
 
 ## Next Steps
 
-1. Decide on the inactive pipe gray and the Öl/Motor spacing.
-2. Optional dashboard cleanup: drop `device` and `status_entity`.
-3. `documentationURL` once the repository is public.
+1. User judges the inactive pipe gray live.
+2. `documentationURL` once the repository is public.

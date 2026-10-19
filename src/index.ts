@@ -1,6 +1,5 @@
 // vi-climate-cards: Home Assistant dashboard cards for the Viessmann
-// Vitocal 250-A. Registers both cards; this file is the bundle entry. It
-// exports nothing, so the bundle also loads as a classic script (test page).
+// Vitocal 250-A. Registers both cards; this file is the bundle entry.
 import { ViHydraulicCard } from "./hydraulic/card";
 import { ViRefrigerantCard } from "./refrigerant/card";
 

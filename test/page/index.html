@@ -71,6 +71,8 @@ if(q.get('se')||q.get('sk')){
  if(q.get('sk')) card.setConfig({...card._config,status_entity:'sensor.phase'}); else card.setConfig({...card._config,status_entity:'sensor.phase',status_items:[{entity:'binary_sensor.hkp3',visibility:[{condition:'state',entity:'sensor.phase',state:'off'}]},
   {entity:'sensor.prog',visibility:ww('state_not')},{entity:'select.wwmode',name:'Warmwasser',visibility:ww('state')},'sensor.rod']});
 }
+// nx=1: no entity mapping and no integration entities: the card names what it misses.
+if(q.get('nx')) card.setConfig({type:card._config.type});
 document.getElementById('wrap').appendChild(card);
 card.hass=hass;
 // info=1: open the explanation dialog of the refrigerant card.

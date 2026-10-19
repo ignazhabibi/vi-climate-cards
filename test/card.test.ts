@@ -42,3 +42,38 @@ describe("minute timer", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
+
+describe("entity resolution", () => {
+  // Calls the private resolver directly: the hass setter would render, which
+  // needs a DOM.
+  type Inner = { _hass: unknown; _resolve(): boolean; _entities: Record<string, string> };
+
+  it("finds entities that become available later and keeps found ones", async () => {
+    const { vitocalHass } = await import("./fixtures/vitocal");
+    const valve1 = "sensor.e3_vitocal_16_sensors_valve_0_expansion_target";
+    const card = new ViRefrigerantCard();
+    const inner = card as unknown as Inner;
+    card.setConfig({ type: "custom:vi-refrigerant-card" });
+
+    // After a restart the valve is unavailable and carries no feature yet.
+    inner._hass = vitocalHass({ unavailable: [valve1] });
+    expect(inner._resolve()).toBe(true);
+    expect(inner._entities.valve_1).toBeUndefined();
+    expect(inner._entities.compressor).toBe("binary_sensor.e3_vitocal_16_verdichter_0");
+
+    // Same registry, the valve is back: found on the next update.
+    const later = vitocalHass();
+    later.entities = (inner._hass as { entities: typeof later.entities }).entities;
+    inner._hass = later;
+    expect(inner._resolve()).toBe(true);
+    expect(inner._entities.valve_1).toBe(valve1);
+
+    // Everything settled: further updates do not search again, and an entity
+    // that turns unavailable keeps its place.
+    const offline = vitocalHass({ unavailable: [valve1] });
+    offline.entities = later.entities;
+    inner._hass = offline;
+    expect(inner._resolve()).toBe(false);
+    expect(inner._entities.valve_1).toBe(valve1);
+  });
+});

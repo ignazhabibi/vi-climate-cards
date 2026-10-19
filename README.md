@@ -1,8 +1,10 @@
 # vi-climate-cards
 
-Home Assistant dashboard cards for a Viessmann Vitocal 250-A, with live values
-from the [vi_climate_devices](https://github.com/ignazhabibi/vi_climate_devices)
-integration.
+Home Assistant dashboard cards for Viessmann heat pumps, starting with the
+Vitocal 250-A. They complete the Viessmann package of
+[vi_api_client](https://github.com/ignazhabibi/vi_api_client) and the
+[vi_climate_devices](https://github.com/ignazhabibi/vi_climate_devices)
+integration, which provides the live values.
 
 - `vi-hydraulic-card` shows the hydraulic schematic: outdoor unit, secondary
   circuit, indoor unit with heating rod, 4/3-way valve and defrost buffer,
@@ -13,9 +15,25 @@ integration.
   and both expansion valves. The flow pattern shows the refrigerant state
   (gas, liquid, droplets behind the valve); in defrost the circuit reverses.
 
-Both cards are one ES module without runtime dependencies. They use the Home
+Both cards are one JavaScript file without runtime dependencies. They use the Home
 Assistant theme variables, so light and dark mode follow the HA theme. Card
 text is German.
+
+## Configuration
+
+With vi_climate_devices v3.1.0 or later a card needs no entity mapping:
+
+```yaml
+type: custom:vi-hydraulic-card   # or custom:vi-refrigerant-card
+```
+
+The card takes the first heat pump of the integration (`device:` picks
+another one by device ID) and finds each part through the Viessmann feature
+the integration names in the entity attribute `viessmann_feature_name`.
+`entities:` overrides single parts; an empty value hides one. Without the
+integration, all parts can be mapped there by hand. A note on the card names
+required parts it cannot find. `preset:` selects the drawing variant; each
+card has one so far (`vitocal-250a-buffer`, `vitocal-250a`).
 
 ## Behaviour
 
@@ -31,7 +49,7 @@ text is German.
   returning `{"state", "detail", "info"}`.
 - An info button opens an explanation for laypeople (`info: false` hides it).
 
-Configuration examples with the full entity mapping:
+Configuration examples with the full entity mapping and the header in use:
 [examples/hydraulic-card.yaml](examples/hydraulic-card.yaml),
 [examples/refrigerant-card.yaml](examples/refrigerant-card.yaml).
 
@@ -60,9 +78,12 @@ test/screenshot.sh "$PWD/test/out/card.png" 760 "m=dhw&dark=1"
 | --- | --- |
 | `src/draw/` | Geometry constants, SVG drawing helpers, `layout()` |
 | `src/hydraulic/`, `src/refrigerant/` | Layouts, explanation dialog, and card class per card |
-| `src/card/` | Shared base class, configuration check, and types |
+| `src/card/` | Shared base class, configuration check, entity keys (`slots.ts`), resolution, types |
+| `src/sources/vi-climate-devices.ts` | Finds the entities in the vi_climate_devices integration |
+| `src/hydraulic/slots.ts`, `src/refrigerant/slots.ts` | Entity keys per card with their Viessmann features |
 | `src/styles/card.css` | Stylesheet of both cards |
 | `test/drawing.test.ts`, `test/snapshots/` | Snapshots of everything the cards draw; update on purpose with `npx vitest run -u` |
 | `test/config.test.ts`, `test/card.test.ts` | Configuration check and card behaviour |
+| `test/discovery.test.ts`, `test/fixtures/vitocal.ts` | Discovery against the entities of a real Vitocal 250-A |
 | `test/page/`, `test/screenshot.sh` | Test page with stubbed `hass`, screenshots |
 | `docs/history.md` | Design history and domain notes |

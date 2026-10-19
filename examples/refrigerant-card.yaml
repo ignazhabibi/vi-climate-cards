@@ -1,4 +1,8 @@
 # Refrigerant circuit card, used in view `diagnose` of dashboard-heizung.
+# With vi_climate_devices (v3.1.0 or later) the card finds its entities on
+# the heat pump device by itself; `entities` below is optional and only
+# overrides single keys (an empty value hides a part). The dashboard still
+# lists the full mapping; discovery finds exactly the same entities.
 type: custom:vi-refrigerant-card
 grid_options:
   columns: full

@@ -56,13 +56,39 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - The `status` template header stays for now (user decision 2026-10-19),
   although no view uses it.
 
+## Entity discovery (2026-10-19, not deployed yet)
+
+- The cards find their entities in vi_climate_devices (v3.1.0 or later):
+  on the heat pump device (`device:` or the first device whose entity reports
+  `heating.compressors.0.active`), each key in `src/*/slots.ts` matches the
+  entity attribute `viessmann_feature_name`; the two status sensors that share
+  `device.messages.status.raw` match by translation key (`heating_rod_stage`),
+  water heater and climate by domain. `entities` overrides single keys; an
+  empty value hides a part. Required parts the card cannot find are named in
+  a note on the card.
+- Checked against the live instance: all 39 entities of both cards carry the
+  attribute and sit on one device; `test/discovery.test.ts` resolves exactly
+  the mapping of `examples/*.yaml` from that data.
+- At startup the integration's entities can be unavailable and carry no
+  attribute yet; the card keeps searching while keys are open and keeps what
+  it found (`_resolve()` in `base-card.ts`).
+- Option `preset` with one value per card (`vitocal-250a-buffer`,
+  `vitocal-250a`); presets follow Viessmann products, added only for a real
+  installation that can be checked.
+- Proposed integration change (for the user, not made from here): give
+  `climate` entities the attribute `viessmann_feature_name`
+  (`heating.circuits.N.operating.modes.active`), so cards can tell several
+  heating circuits apart; today only the unique ID holds the circuit.
+
 ## Next Steps
 
-1. Plan agreed with the user (own instance, built publish-ready):
+1. Deploy discovery (after the user's go-ahead); the dashboards still map
+   all entities by hand, so nothing changes visibly. Then, if the user wants,
+   drop the `entities` blocks from both cards in `dashboard-heizung`.
+2. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
-   - Entities found through the device and `translation_key`, `entities` only
-     for overrides; list what the integration has to provide.
-   - HA card contract: `getStubConfig`, `getConfigForm`, `customCards` with
+   - HA card contract: `getConfigForm` built from the slot tables (device,
+     preset, entity overrides), `getStubConfig`, `customCards` with
      `preview` and `documentationURL`, render only on own entity changes.
    - Keyboard access and labels for every tappable element, focus ring,
      optional tap/hold actions, an option to stop animations.

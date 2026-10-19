@@ -1,9 +1,11 @@
 // vi-refrigerant-card: refrigerant circuit of the Vitocal 250-A with live values.
 import { assets } from "../assets";
 import { ViCard } from "../card/base-card";
+import { REFRIGERANT_SLOTS } from "./slots";
 
 export class ViRefrigerantCard extends ViCard {
-  static override required = ["compressor"];
+  static override slots = REFRIGERANT_SLOTS;
+  static override presets = ["vitocal-250a"];
 
   static override get layouts() {
     return assets().refrigerant;

@@ -6,6 +6,8 @@ import type { Layout } from "../draw/layout";
 import { type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
 import type { Hass, HassEntity } from "./hass";
 import type { InfoContent } from "./info";
+import { isSettled, resolveEntities } from "./resolve";
+import type { Slot } from "./slots";
 
 interface Status {
   state?: string;
@@ -32,8 +34,11 @@ interface BadgeRef {
 type CardClass = typeof ViCard;
 
 export abstract class ViCard extends HTMLElement {
-  /** Entity keys without which the card cannot draw. */
-  static required: string[] = [];
+  /** The entity keys the card draws; see slots.ts. */
+  static slots: Slot[] = [];
+
+  /** Drawing variants; the first is the default. */
+  static presets: string[] = [];
 
   static get layouts(): Layout[] {
     return [];
@@ -53,6 +58,10 @@ export abstract class ViCard extends HTMLElement {
 
   protected _config?: CardConfig;
   protected _hass?: Hass;
+  /** Entity per key: discovered on the device, overridden by `entities`. */
+  protected _entities: Record<string, string> = {};
+  private _registry?: Hass["entities"];
+  private _settled = false;
   protected _root?: HTMLElement;
   protected _key?: string;
   protected _pipes: SVGElement[] = [];
@@ -79,7 +88,7 @@ export abstract class ViCard extends HTMLElement {
   protected abstract _infoLive(): boolean;
 
   setConfig(config: CardConfig): void {
-    checkConfig(config, this.cls.required);
+    checkConfig(config, this.cls.presets);
     if (
       config.status !== this._config?.status ||
       config.status_entity !== this._config?.status_entity ||
@@ -91,6 +100,9 @@ export abstract class ViCard extends HTMLElement {
     }
     this._config = config;
     this._key = undefined;
+    this._entities = {};
+    this._registry = undefined;
+    this._resolve();
     if (this._root) this._build();
     this._subscribe();
     this._syncTick();
@@ -98,7 +110,7 @@ export abstract class ViCard extends HTMLElement {
 
   set hass(hass: Hass) {
     this._hass = hass;
-    if (!this._root) this._build();
+    if (this._resolve() || !this._root) this._build();
     this._update();
     this._subscribe();
     this._entityStatus();
@@ -124,6 +136,26 @@ export abstract class ViCard extends HTMLElement {
       clearInterval(this._tick);
       this._tick = undefined;
     }
+  }
+
+  // Finds the entities on the first hass, after a registry change, and while
+  // keys are still open: at startup the integration's entities can be
+  // unavailable and carry no feature attribute yet. An entity once found is
+  // kept until the registry or the configuration changes. Returns whether the
+  // mapping changed.
+  private _resolve(): boolean {
+    const hass = this._hass;
+    const config = this._config;
+    if (!hass || !config) return false;
+    const fresh = hass.entities !== this._registry;
+    if (!fresh && this._settled) return false;
+    this._registry = hass.entities;
+    const found = resolveEntities(hass, config, this.cls.slots);
+    const entities = fresh ? found : { ...this._entities, ...found };
+    this._settled = this.cls.slots.every((slot) => isSettled(slot, entities, config));
+    if (JSON.stringify(entities) === JSON.stringify(this._entities)) return false;
+    this._entities = entities;
+    return true;
   }
 
   getGridOptions() {
@@ -318,7 +350,7 @@ export abstract class ViCard extends HTMLElement {
         );
       })
       .join("");
-    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap">${layouts}${this._infoDialog(info)}</div></ha-card>`;
+    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap">${this._missingNote()}${layouts}${this._infoDialog(info)}</div></ha-card>`;
     const root = shadow.querySelector(".wrap") as HTMLElement;
     this._root = root;
     this._pipes = [...root.querySelectorAll<SVGElement>(".lay .pipe, .lay .fl")];
@@ -334,7 +366,7 @@ export abstract class ViCard extends HTMLElement {
     }));
     // Drawn devices are tappable only when their entity is configured.
     for (const el of root.querySelectorAll<SVGElement>(".tap")) {
-      if (!config.entities[el.dataset.k as string]) el.classList.remove("tap");
+      if (!this._entities[el.dataset.k as string]) el.classList.remove("tap");
     }
     // Badges, small readings, and tappable devices open the more-info dialog.
     for (const el of root.querySelectorAll<HTMLElement | SVGElement>(".bd, .vv.sm, .tap")) {
@@ -370,6 +402,17 @@ export abstract class ViCard extends HTMLElement {
     });
     this._key = undefined;
     this._renderStatus();
+  }
+
+  // Names the parts the card cannot draw without, once it has looked for them.
+  private _missingNote(): string {
+    if (!this._hass) return "";
+    const missing = this.cls.slots.filter((s) => s.required && !this._entities[s.key]).map((s) => s.label);
+    if (!missing.length) return "";
+    return (
+      `<div class="miss">Es fehlt: ${missing.join(", ")}. Die Karte findet ihre Entitäten am Gerät der ` +
+      "Integration „Viessmann Climate Devices“ (Option device) oder nimmt sie aus der Option entities.</div>"
+    );
   }
 
   // Explanation dialog: a native <dialog> in the top layer, so no ancestor
@@ -435,13 +478,13 @@ export abstract class ViCard extends HTMLElement {
   }
 
   private _moreInfo(key: string): void {
-    const entityId = this._config?.entities[key];
+    const entityId = this._entities[key];
     if (!entityId) return;
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   }
 
   protected _state(key: string): HassEntity | undefined {
-    const id = this._config?.entities[key];
+    const id = this._entities[key];
     return id ? this._hass?.states[id] : undefined;
   }
 
@@ -470,7 +513,7 @@ export abstract class ViCard extends HTMLElement {
     const config = this._config;
     const root = this._root;
     if (!hass || !root || !config) return;
-    const keys = Object.keys(config.entities);
+    const keys = Object.keys(this._entities);
     const key = keys.map((k) => this._state(k)?.state).join("|") + (hass.themes?.darkMode ? "D" : "L");
     if (key === this._key) return;
     this._key = key;
@@ -480,7 +523,7 @@ export abstract class ViCard extends HTMLElement {
       const na = !s || s.state === "unavailable" || s.state === "unknown";
       b.val.textContent = !s ? "—" : b.big && !na ? this._whole(s) : hass.formatEntityState(s);
       b.el.classList.toggle("na", na);
-      b.el.style.display = config.entities[b.key] ? "" : "none";
+      b.el.style.display = this._entities[b.key] ? "" : "none";
     }
     // A heater coil turns warm while it runs (binary on, or a heating rod stage).
     for (const h of this._heaters) {

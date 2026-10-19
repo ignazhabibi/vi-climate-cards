@@ -21,8 +21,14 @@ export interface StatusItemConfig {
 
 export interface CardConfig {
   type: string;
-  /** Entity per drawing key, e.g. `valve: sensor.…`. */
-  entities: Record<string, string | undefined>;
+  /** Device of the vi_climate_devices integration; without it the card takes
+   * the first heat pump. */
+  device?: string;
+  /** Drawing variant; each card has one so far. */
+  preset?: string;
+  /** Entity per drawing key, e.g. `valve: sensor.…`. Overrides what the
+   * integration provides; an empty value hides the part. */
+  entities?: Record<string, string | null | undefined>;
   /** Template for the header; returns {state, detail, info} or plain text. */
   status?: string;
   /** Entity whose state heads the header, with "seit …" from its last change. */
@@ -36,13 +42,18 @@ export interface CardConfig {
 /** The entity a condition looks at, in either shape. */
 export const conditionEntity = (c: StateCondition): string | undefined => c.entity ?? c.entity_id;
 
-/** Throws on a configuration the card cannot draw or would misread. */
-export function checkConfig(config: CardConfig, required: string[]): void {
-  if (!config || typeof config.entities !== "object" || !config.entities) {
-    throw new Error("entities fehlt");
+/** Throws on a configuration the card cannot read or would misread. Whether
+ * the required entities exist is only known once the card sees Home
+ * Assistant; the card reports missing ones itself. */
+export function checkConfig(config: CardConfig, presets: string[]): void {
+  if (!config || typeof config !== "object") throw new Error("Konfiguration fehlt");
+  if (config.entities !== undefined && (typeof config.entities !== "object" || Array.isArray(config.entities))) {
+    throw new Error("entities muss eine Zuordnung Schlüssel → Entität sein");
   }
-  for (const key of required) {
-    if (!config.entities[key]) throw new Error(`entities.${key} fehlt`);
+  if (config.device !== undefined && typeof config.device !== "string")
+    throw new Error("device muss eine Geräte-ID sein");
+  if (config.preset !== undefined && !presets.includes(config.preset)) {
+    throw new Error(`preset "${config.preset}" unbekannt, möglich: ${presets.join(", ")}`);
   }
   for (const item of config.status_items ?? []) {
     if (typeof item === "string") continue;

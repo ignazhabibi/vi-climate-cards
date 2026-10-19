@@ -23,6 +23,16 @@ English too. User-facing card text (labels, explanations) is German.
   can be published later (HACS) without a rewrite. If it is published, the
   refrigerant card goes first: its hardware is the same in every 250-A, while
   the hydraulics differ per house.
+- The cards complete the user's Viessmann package (`vi_api_client`,
+  `vi_climate_devices`, both developed by the user). Name, focus, and
+  drawings stay Viessmann. Other manufacturers may work through manual
+  `entities` mapping but get no priority and no drawings of their own.
+- Entities come from the integration first: `src/sources/vi-climate-devices.ts`
+  matches each key in `slots.ts` by the `viessmann_feature_name` attribute
+  (status sensors by translation key, water heater and climate by domain) on
+  the heat pump device; `entities` overrides single keys. New drawing
+  variants (presets) follow Viessmann products and are added only for a real
+  installation that can be checked.
 - The cards belong to the Home Assistant integration in
   `/Users/michael/Projekte/vi_climate_devices`, which the user maintains, but
   this is a separate project. Never edit the integration or `vi_api_client`

@@ -42,7 +42,9 @@ await build({
   entryPoints: ["src/index.ts"],
   outfile: "dist/vi-climate-cards.js",
   bundle: true,
-  format: "esm",
+  // Wrapped in a function: Home Assistant loads the file as a module, the
+  // test page as a classic script, and no name may leak into the page.
+  format: "iife",
   target: "es2022",
   minify: true,
   legalComments: "none",

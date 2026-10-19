@@ -106,6 +106,10 @@ svg{display:block;width:100%;height:auto}
 .ibtn:focus{outline:none}.ibtn:focus-visible{outline:2px solid var(--primary-color,#03a9f4)}
 .ibtn:hover{background:rgba(127,127,127,.12);color:var(--primary-text-color)}
 .lay.hasinfo .hd{padding-right:56px;min-height:32px}
+/* Note when required entities are missing (see _missingNote). */
+.miss{margin:16px 16px 0;padding:8px 12px;border-radius:8px;border-left:4px solid var(--warning-color,#ffa600);
+  background:rgba(255,166,0,.12);color:var(--primary-text-color);
+  font-family:var(--ha-font-family-body,Roboto,Noto,sans-serif);font-size:var(--ha-font-size-m,14px);line-height:20px}
 dialog.inf{border:none;padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 64px);box-sizing:border-box;
   border-radius:var(--ha-dialog-border-radius,24px);background:var(--ha-card-background,var(--card-background-color,#fff));
   color:var(--primary-text-color);font-family:var(--ha-font-family-body,Roboto,Noto,sans-serif);

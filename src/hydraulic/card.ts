@@ -1,9 +1,11 @@
 // vi-hydraulic-card: hydraulic schematic of the Vitocal 250-A with live values.
 import { assets } from "../assets";
 import { ViCard } from "../card/base-card";
+import { HYDRAULIC_SLOTS } from "./slots";
 
 export class ViHydraulicCard extends ViCard {
-  static override required = ["valve", "volumetric_flow"];
+  static override slots = HYDRAULIC_SLOTS;
+  static override presets = ["vitocal-250a-buffer"];
 
   static override get layouts() {
     return assets().hydraulic;
@@ -49,7 +51,7 @@ export class ViHydraulicCard extends ViCard {
 
     // Each fan follows its own speed; without a fan entity it follows fan 1,
     // and without that the compressor. Both stop during defrost.
-    const entities = this._config?.entities ?? {};
+    const entities = this._entities;
     const comp = this._state("compressor")?.state === "on";
     let anyFan = false;
     for (const f of this._fans) {

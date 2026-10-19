@@ -5,10 +5,15 @@ const base: CardConfig = { type: "custom:vi-refrigerant-card", entities: { compr
 const withItems = (status_items: CardConfig["status_items"]): CardConfig => ({ ...base, status_items });
 
 describe("checkConfig", () => {
-  it("needs the required entities", () => {
-    expect(() => checkConfig({ ...base, entities: {} }, ["compressor"])).toThrow("entities.compressor fehlt");
-    expect(() => checkConfig({ type: "x" } as CardConfig, [])).toThrow("entities fehlt");
-    expect(() => checkConfig(base, ["compressor"])).not.toThrow();
+  it("needs no entities, but reads them, device, and preset correctly", () => {
+    expect(() => checkConfig({ type: "x" }, [])).not.toThrow();
+    expect(() => checkConfig(base, [])).not.toThrow();
+    expect(() => checkConfig({ type: "x", entities: null } as unknown as CardConfig, [])).not.toThrow();
+    expect(() => checkConfig({ type: "x", entities: ["a"] } as unknown as CardConfig, [])).toThrow("entities muss");
+    expect(() => checkConfig({ type: "x", device: 3 } as unknown as CardConfig, [])).toThrow("device muss");
+    expect(() => checkConfig({ type: "x", preset: "vitocal-250a" }, ["vitocal-250a"])).not.toThrow();
+    expect(() => checkConfig({ type: "x", preset: "other" }, ["vitocal-250a"])).toThrow('preset "other" unbekannt');
+    expect(() => checkConfig(undefined as unknown as CardConfig, [])).toThrow("Konfiguration fehlt");
   });
 
   it("accepts state conditions in both shapes", () => {

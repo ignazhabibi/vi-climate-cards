@@ -21,7 +21,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+a44ae10` (66,821 bytes, djb2 2366622182, checked in the
+  build `0.1.0+27ccf4b` (67,577 bytes, djb2 2768155876, checked in the
   browser against the local file), which includes the cleanup, the entity
   discovery, the card editor, the plan items, and the review follow-up below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
@@ -183,6 +183,13 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   `grid_options`, and `status_items`. Checked live: headers show the
   detected state, 21 and 24 parts, no note, no console errors.
 - The darker inactive pipe gray stays for the user to judge live.
+- Refrigerant card (27ccf4b): the open housing's interior takes the card
+  background, so the components read as devices; device names there use the
+  size of the value names (11 px at full size). Warning note, hover, info
+  box, and dialog spacing use HA's semantic tokens. Kept on purpose: the
+  drawing's own colors (dark outdoor unit, white overlays on it), the
+  overlay sizes in `--u` units, and fixed line heights and header button
+  geometry, which have no matching HA token.
 
 ## Next Steps
 

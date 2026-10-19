@@ -21,9 +21,9 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+7603810` (62,676 bytes, djb2 4023146547, checked in the
+  build `0.1.0+fd914ea` (66,815 bytes, djb2 1464707642, checked in the
   browser against the local file), which includes the cleanup, the entity
-  discovery, the card editor, and the plan items below. `dashboard-heizung` uses the new card
+  discovery, the card editor, the plan items, and the review follow-up below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
   `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
   views were checked live while the heat pump was heating (rendering, no
@@ -149,7 +149,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   "Bewegung zeigen" and "Interaktionen" (tap: more-info, hold: none), and
   switching motion off stopped the preview.
 
-## Review follow-up (2026-10-19, not deployed yet)
+## Review follow-up (2026-10-19, deployed)
 
 - Card-wide `tap_action` / `hold_action` removed again (user decision: every
   part has its own entity, so a tap always opens more-info).
@@ -160,8 +160,10 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - New editor element (`getConfigElement`, HA's `ha-form` inside): device and
   entity fields show what the card detects, helpers say "Automatisch
   erkannt" / "Eigene Wahl" / "Ausgeblendet" / "Nicht gefunden", and only
-  deviations are saved (`configFromForm`). Checked in headless Chrome with a
-  stand-in form; not yet checked live in HA.
+  deviations are saved (`configFromForm`). Checked live in HA (refrigerant
+  card, nothing saved): the device field shows "Wärmepumpe · Keller" as
+  detected, all 24 entity fields are filled and marked "Automatisch
+  erkannt", and Speichern stays disabled until something changes.
 - Viewer pause button (WCAG 2.2.2) left of the info button, remembered in
   localStorage for all cards, hidden with reduced motion.
 - Contrast: inactive pipes 1.45:1 → 3:1 and more (lightest gray mixed from
@@ -169,11 +171,20 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   3.1 → 3.4). Focus in `--ha-color-focus`. Spacing, radii, and weights use
   `--ha-*` tokens; text and card colors stay the theme's legacy variables,
   which user themes set.
+- Checked live after the deploy: both cards find all parts (21 and 24 with
+  the state), headers show the detected state, the pause button switches to
+  play and stops the motion (switched back), no console errors. The header
+  line wraps one word earlier because of the second button.
+- The hydraulic card in `uebersicht` now carries
+  `device: bd5354237765b40a51fbb3d220ec3738` (saved between the 7603810 check
+  and this deploy, not by the agent); it equals the detected device, and
+  both cards still carry `status_entity`. Both could go (ask first).
 - Small values have 24 px tap targets. Open: "Öl" and "Motor" are 16–23 px
   apart, so their targets overlap slightly; a full fix needs more spacing in
   the refrigerant drawing (user to decide).
 
 ## Next Steps
 
-1. Commit, deploy, check the new editor live in HA.
-2. `documentationURL` once the repository is public.
+1. Decide on the inactive pipe gray and the Öl/Motor spacing.
+2. Optional dashboard cleanup: drop `device` and `status_entity`.
+3. `documentationURL` once the repository is public.

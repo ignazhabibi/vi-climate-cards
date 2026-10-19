@@ -1,0 +1,134 @@
+<svg viewBox='0 0 944 728' role='img' aria-label='Kältekreis'>
+<defs>
+<linearGradient id='vi-rf-sky' x1='0' y1='0' x2='0' y2='1'>
+<stop class='sky0' offset='0'/>
+<stop class='sky1' offset='1'/>
+</linearGradient>
+<pattern id='vi-rf-tuft' patternUnits='userSpaceOnUse' x='19' y='698' width='9' height='4'>
+<path class='lawn' d='M0 4 l2 -4 l2 4 Z'/>
+</pattern>
+<pattern id='vi-rf-fin' patternUnits='userSpaceOnUse' x='0' y='220' width='8' height='5'>
+<rect class='fin' width='8' height='1.2'/>
+</pattern>
+<clipPath id='vi-rf-c-inv'>
+<rect x='298' y='316' width='112' height='80' rx='6'/>
+</clipPath>
+<clipPath id='vi-rf-c-cond'>
+<rect x='736' y='220' width='36' height='260' rx='6'/>
+</clipPath>
+<clipPath id='vi-rf-c-ihx'>
+<rect x='428' y='220' width='171' height='80' rx='6'/>
+</clipPath>
+</defs>
+<rect fill='url(#vi-rf-sky)' x='16' y='8' width='912' height='694'/>
+<path class='ground' d='M16 702 H928 V704 a16 16 0 0 1 -16 16 H32 a16 16 0 0 1 -16 -16 Z'/>
+<rect class='lawn' x='16' y='702' width='912' height='6'/>
+<rect x='16' y='698' width='912' height='4' fill='url(#vi-rf-tuft)'/>
+<g class='air'>
+<path d='M122 254 q6 -5 12 0 t12 0'/>
+<path d='M122 268 q6 -5 12 0 t12 0'/>
+<path d='M122 282 q6 -5 12 0 t12 0'/>
+</g>
+<g class='air'>
+<path d='M122 430 q6 -5 12 0 t12 0'/>
+<path d='M122 444 q6 -5 12 0 t12 0'/>
+<path d='M122 458 q6 -5 12 0 t12 0'/>
+</g>
+<rect class='devd plinth' x='160' y='684' width='648' height='18' rx='2'/>
+<rect class='devd' x='150' y='52' width='668' height='636' rx='14'/>
+<rect class='dev' x='158' y='60' width='652' height='620' rx='8'/>
+<rect class='dev' x='180' y='220' width='100' height='370' rx='6'/>
+<rect x='184' y='226' width='92' height='358' fill='url(#vi-rf-fin)'/>
+<rect class='devl' x='180' y='220' width='100' height='370' rx='6'/>
+<g class='fanbox tap' data-k='fan_1'>
+<rect class='devd' x='194' y='232' width='72' height='72' rx='8'/>
+<circle class='guard' cx='230' cy='268' r='30' stroke-width='1.5'/>
+<circle class='guard' cx='230' cy='268' r='25.2632' stroke-width='1' stroke-dasharray='2 5'/>
+<circle class='fan-disc' cx='230' cy='268' r='20.5263'/>
+<g transform='translate(230 268)'>
+<g class='fan'>
+<path transform='scale(1.11) translate(-12 -12)' d='M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.030,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.590 14.28,14 13.880,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z'/>
+</g>
+</g>
+</g>
+<g class='fanbox tap' data-k='fan_2'>
+<rect class='devd' x='194' y='408' width='72' height='72' rx='8'/>
+<circle class='guard' cx='230' cy='444' r='30' stroke-width='1.5'/>
+<circle class='guard' cx='230' cy='444' r='25.2632' stroke-width='1' stroke-dasharray='2 5'/>
+<circle class='fan-disc' cx='230' cy='444' r='20.5263'/>
+<g transform='translate(230 444)'>
+<g class='fan'>
+<path transform='scale(1.11) translate(-12 -12)' d='M12,11A1,1 0 0,0 11,12A1,1 0 0,0 12,13A1,1 0 0,0 13,12A1,1 0 0,0 12,11M12.5,2C17,2 17.11,5.57 14.75,6.75C13.76,7.24 13.32,8.29 13.13,9.22C13.61,9.42 14.030,9.73 14.35,10.13C18.05,8.13 22.03,8.92 22.03,12.5C22.03,17 18.46,17.1 17.28,14.73C16.78,13.74 15.72,13.3 14.79,13.11C14.59,13.590 14.28,14 13.880,14.34C15.87,18.03 15.08,22 11.5,22C7,22 6.91,18.42 9.27,17.24C10.25,16.75 10.69,15.71 10.89,14.79C10.4,14.59 9.97,14.27 9.65,13.87C5.96,15.85 2,15.07 2,11.5C2,7 5.56,6.89 6.74,9.26C7.24,10.25 8.29,10.68 9.22,10.87C9.41,10.39 9.73,9.97 10.14,9.65C8.15,5.96 8.94,2 12.5,2Z'/>
+</g>
+</g>
+</g>
+<g class='tap' data-k='inverter_power'>
+<rect class='dev' x='298' y='316' width='112' height='80' rx='6'/>
+<g clip-path='url(#vi-rf-c-inv)'>
+<rect class='shade' x='390' y='316' width='20' height='80'/>
+</g>
+<rect class='devl' x='298' y='316' width='112' height='80' rx='6'/>
+</g>
+<path class='wire' d='M354 396 V462 H428'/>
+<rect class='dev' x='736' y='220' width='36' height='260' rx='6'/>
+<g clip-path='url(#vi-rf-c-cond)'>
+<rect class='shade' x='761.92' y='220' width='10.08' height='260'/>
+</g>
+<rect class='devl' x='736' y='220' width='36' height='260' rx='6'/>
+<rect class='dev' x='428' y='220' width='171' height='80' rx='6'/>
+<g clip-path='url(#vi-rf-c-ihx)'>
+<rect class='shade' x='579' y='220' width='20' height='80'/>
+</g>
+<rect class='devl' x='428' y='220' width='171' height='80' rx='6'/>
+<g class='tap' data-k='compressor_speed'>
+<rect class='devd' x='428' y='412' width='118' height='216' rx='29'/>
+<rect class='hl' x='436' y='441' width='6' height='158' rx='3'/>
+<rect class='devl' x='428' y='412' width='118' height='216' rx='29'/>
+</g>
+<path class='pipe r' data-g='l2b' d='M343 140 H230 V220'/>
+<path class='pipe s' data-g='l2a' d='M436 220 V140 H365'/>
+<path class='pipe s' data-g='l1b' d='M661 140 H591 V220'/>
+<path class='pipe s' data-g='l1a' d='M754 220 V140 H683'/>
+<path class='pipe r' data-g='e' d='M230 590 V646 H672 V522'/>
+<path class='pipe r' data-g='s' d='M672 494 V260 H599'/>
+<path class='pipe r' data-g='s' d='M487 300 V412'/>
+<path class='pipe s' data-g='d' d='M546 508 H658'/>
+<path class='pipe s' data-g='c' d='M686 508 H754 V480'/>
+<path class='pipe r' data-g='wr' d='M928 268 H772'/>
+<path class='pipe s' data-g='wv' d='M772 444 H928'/>
+<path class='fl' data-g='l2b' d='M343 140 H230 V220'/>
+<path class='fl' data-g='l2a' d='M436 220 V140 H365'/>
+<path class='fl' data-g='l1b' d='M661 140 H591 V220'/>
+<path class='fl' data-g='l1a' d='M754 220 V140 H683'/>
+<path class='fl' data-g='e' d='M230 590 V646 H672 V522'/>
+<path class='fl' data-g='s' d='M672 494 V260 H599'/>
+<path class='fl' data-g='s' d='M487 300 V412'/>
+<path class='fl' data-g='d' d='M546 508 H658'/>
+<path class='fl' data-g='c' d='M686 508 H754 V480'/>
+<path class='fl' data-g='wr' d='M928 268 H772'/>
+<path class='fl' data-g='wv' d='M772 444 H928'/>
+<circle class='valve' cx='672' cy='508' r='14' stroke-width='1.5'/>
+<path class='eev' d='M672 508 L683 503 L683 513 Z M672 508 L661 513 L661 503 Z M672 508 L667 519 L677 519 Z M672 508 L677 497 L667 497 Z'/>
+<g class='tap' data-k='valve_2'>
+<circle class='hit' cx='354' cy='134' r='20'/>
+<line class='eev' x1='354' y1='140' x2='354' y2='127'/>
+<circle class='eev' cx='354' cy='124' r='4'/>
+<path class='eev' d='M343 133 L354 140 L343 147 Z M365 133 L354 140 L365 147 Z'/>
+</g>
+<g class='tap' data-k='valve_1'>
+<circle class='hit' cx='672' cy='134' r='20'/>
+<line class='eev' x1='672' y1='140' x2='672' y2='127'/>
+<circle class='eev' cx='672' cy='124' r='4'/>
+<path class='eev' d='M661 133 L672 140 L661 147 Z M683 133 L672 140 L683 147 Z'/>
+</g>
+<g class='heater tap' data-k='crankcase_heater'>
+<circle class='hit' cx='487' cy='600' r='22'/>
+<circle class='valve' cx='487' cy='600' r='14' stroke-width='1.5'/>
+<path class='coil' d='M477 603 L480 603 C488 590 477 590 485 603 C493 590 482 590 490 603 C498 590 487 590 495 603 L497 603'/>
+</g>
+<g class='heater tap' data-k='base_heater'>
+<circle class='hit' cx='230' cy='554' r='22'/>
+<circle class='valve' cx='230' cy='554' r='14' stroke-width='1.5'/>
+<path class='coil' d='M220 557 L223 557 C231 544 220 544 228 557 C236 544 225 544 233 557 C241 544 230 544 238 557 L240 557'/>
+</g>
+</svg>

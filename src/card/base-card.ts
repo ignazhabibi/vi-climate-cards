@@ -3,37 +3,9 @@
 // `_apply()`, which maps entity states onto the drawing.
 import { assets } from "../assets";
 import type { Layout } from "../draw/layout";
+import { type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
 import type { Hass, HassEntity } from "./hass";
 import type { InfoContent } from "./info";
-
-/** HA's `state` condition, the only visibility condition the header knows. */
-export interface StateCondition {
-  condition?: string;
-  entity: string;
-  state?: string | string[];
-  state_not?: string | string[];
-}
-
-export interface StatusItemConfig {
-  entity: string;
-  /** Overrides the entity name; `false` shows the state alone. */
-  name?: string | false;
-  visibility?: StateCondition[];
-}
-
-export interface CardConfig {
-  type: string;
-  /** Entity per drawing key, e.g. `valve: sensor.…`. */
-  entities: Record<string, string | undefined>;
-  /** Template for the header; returns {state, detail, info} or plain text. */
-  status?: string;
-  /** Entity whose state heads the header, with "seit …" from its last change. */
-  status_entity?: string;
-  /** Entities for the header line below the state. */
-  status_items?: (string | StatusItemConfig)[];
-  /** `false` hides the info button. */
-  info?: boolean;
-}
 
 interface Status {
   state?: string;
@@ -86,7 +58,6 @@ export abstract class ViCard extends HTMLElement {
   protected _pipes: SVGElement[] = [];
   protected _ptrs: SVGElement[] = [];
   protected _fans: SVGElement[] = [];
-  protected _dots: HTMLElement[] = [];
   protected _pumps: SVGElement[] = [];
   protected _heaters: SVGElement[] = [];
   protected _badgeEls: BadgeRef[] = [];
@@ -103,13 +74,12 @@ export abstract class ViCard extends HTMLElement {
   /** Maps the entity states onto the drawing. */
   protected abstract _apply(): void;
 
+  /** Whether the explanation shows live values: at rest the temperatures even
+   * out and explain nothing. */
+  protected abstract _infoLive(): boolean;
+
   setConfig(config: CardConfig): void {
-    if (!config || typeof config.entities !== "object") {
-      throw new Error("entities fehlt");
-    }
-    for (const key of this.cls.required) {
-      if (!config.entities[key]) throw new Error(`entities.${key} fehlt`);
-    }
+    checkConfig(config, this.cls.required);
     if (
       config.status !== this._config?.status ||
       config.status_entity !== this._config?.status_entity ||
@@ -123,6 +93,7 @@ export abstract class ViCard extends HTMLElement {
     this._key = undefined;
     if (this._root) this._build();
     this._subscribe();
+    this._syncTick();
   }
 
   set hass(hass: Hass) {
@@ -135,14 +106,24 @@ export abstract class ViCard extends HTMLElement {
 
   connectedCallback(): void {
     this._subscribe();
-    // The "seit …" text of an entity status ages without a state change.
-    if (!this._tick) this._tick = setInterval(() => this._entityStatus(), 60000);
+    this._syncTick();
   }
 
   disconnectedCallback(): void {
     this._unsubscribe();
-    clearInterval(this._tick);
-    this._tick = undefined;
+    this._syncTick();
+  }
+
+  // The "seit …" text of an entity status ages without a state change, so it
+  // is refreshed every minute while the card shows one.
+  private _syncTick(): void {
+    const needed = this.isConnected && !!this._config?.status_entity && !this._config.status;
+    if (needed && !this._tick) {
+      this._tick = setInterval(() => this._entityStatus(), 60000);
+    } else if (!needed && this._tick) {
+      clearInterval(this._tick);
+      this._tick = undefined;
+    }
   }
 
   getGridOptions() {
@@ -194,10 +175,11 @@ export abstract class ViCard extends HTMLElement {
   }
 
   // Item visibility in the shape of HA's visibility conditions; only the
-  // `state` condition (with `state` or `state_not`, a value or a list).
+  // `state` condition (with `state` or `state_not`, a value or a list), as
+  // checked in setConfig.
   private _visible(conditions: StateCondition[] | undefined): boolean {
     return (conditions || []).every((c) => {
-      const cur = this._hass?.states[c.entity]?.state as string;
+      const cur = this._hass?.states[conditionEntity(c) as string]?.state as string;
       const list = (v: string | string[]) => ([] as string[]).concat(v);
       if (c.state !== undefined && !list(c.state).includes(cur)) return false;
       if (c.state_not !== undefined && list(c.state_not).includes(cur)) return false;
@@ -330,16 +312,9 @@ export abstract class ViCard extends HTMLElement {
               `<span class="n">${v.n}</span><span class="s">—</span></div>`,
           )
           .join("");
-        const dots = l.dots
-          .map(
-            (d) =>
-              `<div class="o dot" data-k="${d.k}" style="left:${d.x}%;top:${d.y}%" title="${d.t}">` +
-              `<ha-icon icon="${d.i}"></ha-icon></div>`,
-          )
-          .join("");
         return (
           `<div class="lay ${l.c}${info ? " hasinfo" : ""}">${ibtn}${hd}<div class="sc">${l.svg}` +
-          `<div class="ov">${l.text}${badges}${values}${dots}</div></div></div>`
+          `<div class="ov">${l.text}${badges}${values}</div></div></div>`
         );
       })
       .join("");
@@ -349,7 +324,6 @@ export abstract class ViCard extends HTMLElement {
     this._pipes = [...root.querySelectorAll<SVGElement>(".lay .pipe, .lay .fl")];
     this._ptrs = [...root.querySelectorAll<SVGElement>(".p1")];
     this._fans = [...root.querySelectorAll<SVGElement>(".fanbox")];
-    this._dots = [...root.querySelectorAll<HTMLElement>(".dot")];
     this._pumps = [...root.querySelectorAll<SVGElement>(".pump")];
     this._heaters = [...root.querySelectorAll<SVGElement>(".heater")];
     this._badgeEls = [...root.querySelectorAll<HTMLElement>(".bd, .vv")].map((el) => ({
@@ -362,9 +336,8 @@ export abstract class ViCard extends HTMLElement {
     for (const el of root.querySelectorAll<SVGElement>(".tap")) {
       if (!config.entities[el.dataset.k as string]) el.classList.remove("tap");
     }
-    // Badges, small readings, tappable devices, and the round heater dots open
-    // the more-info dialog.
-    for (const el of root.querySelectorAll<HTMLElement | SVGElement>(".bd, .vv.sm, .tap, .dot")) {
+    // Badges, small readings, and tappable devices open the more-info dialog.
+    for (const el of root.querySelectorAll<HTMLElement | SVGElement>(".bd, .vv.sm, .tap")) {
       el.addEventListener("click", () => this._moreInfo(el.dataset.k as string));
     }
     // Header parts of an entity status open the entity they show.
@@ -461,12 +434,6 @@ export abstract class ViCard extends HTMLElement {
     }
   }
 
-  // When the live lines make sense: the refrigerant cycle only while the
-  // compressor runs forwards.
-  protected _infoLive(): boolean {
-    return this._running() && this._state("defrost")?.state !== "on";
-  }
-
   private _moreInfo(key: string): void {
     const entityId = this._config?.entities[key];
     if (!entityId) return;
@@ -482,11 +449,6 @@ export abstract class ViCard extends HTMLElement {
     const s = this._state(key);
     const v = s ? parseFloat(s.state) : Number.NaN;
     return Number.isFinite(v) ? v : 0;
-  }
-
-  protected _running(): boolean {
-    const comp = this._state("compressor");
-    return comp ? comp.state === "on" : this._num("compressor_speed") > 0;
   }
 
   // Big readings (tank content, device value) as whole numbers: "51 °C".
@@ -520,7 +482,6 @@ export abstract class ViCard extends HTMLElement {
       b.el.classList.toggle("na", na);
       b.el.style.display = config.entities[b.key] ? "" : "none";
     }
-    for (const d of this._dots) d.classList.toggle("on", this._state(d.dataset.k as string)?.state === "on");
     // A heater coil turns warm while it runs (binary on, or a heating rod stage).
     for (const h of this._heaters) {
       const s = this._state(h.dataset.k as string)?.state;

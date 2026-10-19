@@ -11,15 +11,15 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   `vi-kaeltekreis-card`). The geometry is now computed in the browser on
   first use instead of shipping finished SVG, so the bundle is about 49 KB
   instead of 79 KB.
-- The port is checked, not assumed:
-  - `test/parity.test.ts` compares SVG, overlay, badge positions, CSS, and
-    dialog content with the former build's data (`test/fixtures/legacy.json`).
-    They match exactly apart from the listed renames.
-  - `test/compare-legacy.mjs` rendered both test pages in 80 scenarios
-    (all modes, light and dark, all widths, headers, dialog) with
-    animations off: all 80 are pixel-identical. With animations on, only
-    the moving parts differ, because a screenshot catches them in a random
-    phase.
+- The port was checked, not assumed: a test compared SVG, overlay, badge
+  positions, CSS, and dialog content with the former build's data (exact
+  match apart from renames), and both test pages were rendered in 80
+  scenarios (all modes, light and dark, all widths, headers, dialog) with
+  animations off: pixel-identical. Both migration checks were removed after
+  the cleanup; git history has them (commit `1fdb53d`).
+- Tests now: `test/drawing.test.ts` keeps everything the cards draw as files
+  in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
+  and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
   build `0.1.0+1fdb53d` (48,978 bytes, djb2 4199979991, checked in the
   browser against the local file). `dashboard-heizung` uses the new card
@@ -36,22 +36,28 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   names), and domain notes are in `docs/history.md`; they still apply apart
   from the view layout above.
 
+## Done in the cleanup (2026-10-19, not deployed yet)
+
+- Aliases for the former card names removed (no dashboard used them).
+- Unused round status dots (`dots`, `.dot`) removed; the snapshot diff showed
+  only the `.dot` CSS rules, and all 80 rendered scenarios stayed
+  pixel-identical to the former project.
+- The refrigerant card requires `compressor`; the fallback to
+  `compressor_speed` is gone. Each card decides when its explanation shows
+  live values (`_infoLive()`).
+- `setConfig` rejects `status_items` visibility conditions other than
+  `state`, conditions without entity, and conditions without `state` or
+  `state_not`; `entity_id` (the shape the HA editor writes since 2026.10) is
+  accepted next to `entity`.
+- The minute timer for "seit …" runs only while the card is connected and
+  shows a `status_entity` header.
+- The `status` template header stays for now (user decision 2026-10-19),
+  although no view uses it.
+
 ## Next Steps
 
-1. Remove the aliases for the former card names (`index.ts`): no dashboard
-   uses them any more.
-2. Cleanup from the review (2026-10-19):
-   - Remove the unused round status dots (`dots`, `.dot`): no layout has any.
-   - Decide with the user whether the `status` template header stays; no view
-     uses it since step 22 in `docs/history.md`.
-   - The refrigerant card requires `compressor` but `_running()` falls back to
-     `compressor_speed`; keep one of the two.
-   - `_visible()` treats unknown condition types as true; reject them in
-     `setConfig`.
-   - Start the minute timer only with `status_entity`.
-   - Retire `test/parity.test.ts`, `test/compare-legacy.mjs`, and the fixture
-     once the drawing changes on purpose; replace them with snapshot tests.
-3. Plan agreed with the user (own instance, built publish-ready):
+1. Deploy the cleanup (after the user's go-ahead) and check both views live.
+2. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
    - Entities found through the device and `translation_key`, `entities` only
      for overrides; list what the integration has to provide.

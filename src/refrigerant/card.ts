@@ -17,6 +17,15 @@ export class ViRefrigerantCard extends ViCard {
     return 9;
   }
 
+  // The cycle lines make sense only while the compressor runs forwards.
+  protected _infoLive(): boolean {
+    return this._running() && this._state("defrost")?.state !== "on";
+  }
+
+  private _running(): boolean {
+    return this._state("compressor")?.state === "on";
+  }
+
   protected _apply(): void {
     const root = this._root as HTMLElement;
     const running = this._running();

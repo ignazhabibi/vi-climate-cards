@@ -42,7 +42,9 @@ English too. User-facing card text (labels, explanations) is German.
     `layout()`, which turns a drawing into SVG, overlay, and positions.
   - `hydraulic/`, `refrigerant/`: per card the layouts (`wide`, `narrow`),
     the explanation dialog, and the card class with `_apply()`.
-  - `card/`: the shared base class `ViCard`, `hass` types, dialog types.
+  - `card/`: the shared base class `ViCard`, the configuration types and
+    check (`config.ts`, no DOM, so it is unit-tested), `hass` types, dialog
+    types.
   - `styles/card.css`: the stylesheet; `%NAME%` placeholders are filled from
     the constants in `styles/index.ts`.
   - `assets.ts`: computes layouts, dialogs, and CSS once on first use.
@@ -88,6 +90,10 @@ English too. User-facing card text (labels, explanations) is German.
 ## Verification
 
 1. `npm run check`: type check, Biome lint and format check, Vitest, build.
+   `test/snapshots/` holds everything the cards draw (SVG one element per
+   line, overlay, positions, CSS, dialogs). When a change alters the drawing
+   on purpose, update them with `./node_modules/.bin/vitest run -u` and check
+   that the diff contains only the intended change.
    Run the tools from `node_modules/.bin` directly when `npm`/`npx` print
    certificate noise in the sandbox. Install packages with
    `npm_config_cache="$TMPDIR/npm-cache"`; the sandbox blocks `~/.npm`.

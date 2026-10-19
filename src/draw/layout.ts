@@ -11,8 +11,6 @@ export type LabelSpec = [cls: string, x: number, y: number, text: string];
 export type BadgeSpec = [key: string, x: number, y: number, icon: string, cls: string, name: string];
 /** A plain reading: entity key, x, y, name, class ("big" or "sm", plus modifiers). */
 export type ValueSpec = [key: string, x: number, y: number, name: string, cls: string];
-/** A round status dot: entity key, x, y, icon, title. */
-export type DotSpec = [key: string, x: number, y: number, icon: string, title: string];
 
 export interface Badge {
   k: string;
@@ -29,13 +27,6 @@ export interface Value {
   n: string;
   c: string;
 }
-export interface Dot {
-  k: string;
-  x: number;
-  y: number;
-  i: string;
-  t: string;
-}
 
 export interface Layout {
   /** Layout classes; the last one names the layout and scopes its rules. */
@@ -43,7 +34,6 @@ export interface Layout {
   svg: string;
   text: string;
   badges: Badge[];
-  dots: Dot[];
   values: Value[];
 }
 
@@ -55,7 +45,6 @@ export interface LayoutSpec {
   body: string[];
   labels: LabelSpec[];
   badges: BadgeSpec[];
-  dots?: DotSpec[];
   values?: ValueSpec[];
   /** Center of the 4/3-way valve; its pointer turns around it. */
   vx?: number;
@@ -83,7 +72,6 @@ export function layout(s: LayoutSpec): { layout: Layout; css: string } {
       svg,
       text,
       badges: s.badges.map(([k, x, y, i, c, n]) => ({ k, x: px(x), y: py(y), i, c, n })),
-      dots: (s.dots ?? []).map(([k, x, y, i, t]) => ({ k, x: px(x), y: py(y), i, t })),
       // Plain readings: "big" is the content of a tank (the tank itself is
       // the tap target), "sm" a minor value written next to a device.
       values: (s.values ?? []).map(([k, x, y, n, c]) => ({ k, x: px(x), y: py(y), n, c })),

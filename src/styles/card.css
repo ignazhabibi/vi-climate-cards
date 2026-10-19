@@ -81,7 +81,7 @@ svg{display:block;width:100%;height:auto}
   background:var(--dev);color:var(--secondary-text-color)}
 .lb.v{transform:translate(-50%,-50%) rotate(-90deg)}
 .o{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:auto}
-.bd::after,.dot::after{content:"";position:absolute;inset:calc(-6 * var(--u)) 0}.dot::after{inset:-8px}
+.bd::after{content:"";position:absolute;inset:calc(-6 * var(--u)) 0}
 .bd.ni{padding:0 calc(12 * var(--u))}.bd.ni .info{padding-right:0}
 .vv{display:flex;flex-direction:column;align-items:center;line-height:1.15;color:var(--primary-text-color)}
 .vv.big{pointer-events:none}.vv.big .n{font-size:calc(11 * var(--u));line-height:1.3}.vv.big .s{font-size:calc(20 * var(--u));font-weight:400;line-height:1.2}
@@ -98,11 +98,6 @@ svg{display:block;width:100%;height:auto}
 .n{font-size:calc(10 * var(--u));font-weight:500;line-height:calc(10 * var(--u));letter-spacing:.1px;color:var(--secondary-text-color)}
 .s{font-size:calc(12 * var(--u));font-weight:500;line-height:calc(16 * var(--u));letter-spacing:.1px;color:var(--primary-text-color)}
 .bd.na .s{color:var(--disabled-text-color,#9e9e9e)}
-.dot{display:flex;align-items:center;justify-content:center;border-radius:50%;box-sizing:border-box;cursor:pointer;
-  width:calc(2 * %VR% * var(--g));height:calc(2 * %VR% * var(--g));--mdc-icon-size:calc(16 * var(--g));
-  background:var(--card-background-color,#fff);border:calc(1.5 * var(--g)) solid var(--divider-color,#e0e0e0);
-  color:var(--secondary-text-color)}
-.dot ha-icon{display:flex}.dot.on ha-icon{color:var(--warm)}
 .fin{fill:var(--devl)}
 .hl{fill:rgba(255,255,255,.08)}
 .eev{fill:var(--card-background-color,#fff);stroke:var(--secondary-text-color);stroke-opacity:.7;stroke-width:1.2;stroke-linejoin:round}

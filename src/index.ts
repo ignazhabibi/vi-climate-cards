@@ -26,13 +26,3 @@ for (const [type, cls, name, description] of cards) {
   window.customCards = window.customCards || [];
   window.customCards.push({ type, name, description });
 }
-
-// Former names from the vi-anlagenschema-card project, so existing dashboards
-// keep working during the switch. Not offered in the card picker.
-const aliases: [type: string, cls: CustomElementConstructor][] = [
-  ["vi-anlagenschema-card", class extends ViHydraulicCard {}],
-  ["vi-kaeltekreis-card", class extends ViRefrigerantCard {}],
-];
-for (const [type, cls] of aliases) {
-  if (!customElements.get(type)) customElements.define(type, cls);
-}

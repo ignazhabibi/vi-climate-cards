@@ -1,0 +1,129 @@
+{
+ "badges": [
+  {
+   "k": "valve_2",
+   "x": 37.5,
+   "y": 12.912,
+   "i": "",
+   "c": "",
+   "n": "Ventil 2"
+  },
+  {
+   "k": "valve_1",
+   "x": 71.186,
+   "y": 12.912,
+   "i": "",
+   "c": "",
+   "n": "Ventil 1"
+  },
+  {
+   "k": "evaporator_liquid",
+   "x": 24.364,
+   "y": 24.725,
+   "i": "",
+   "c": "",
+   "n": "Flüssiggas"
+  },
+  {
+   "k": "economizer_liquid",
+   "x": 62.606,
+   "y": 24.725,
+   "i": "",
+   "c": "",
+   "n": "Flüssiggas"
+  },
+  {
+   "k": "condenser_liquid",
+   "x": 79.873,
+   "y": 24.725,
+   "i": "",
+   "c": "",
+   "n": "Flüssiggas"
+  },
+  {
+   "k": "superheat",
+   "x": 71.186,
+   "y": 45.742,
+   "i": "",
+   "c": "",
+   "n": "Überhitzung"
+  },
+  {
+   "k": "suction_temp",
+   "x": 51.589,
+   "y": 45.742,
+   "i": "",
+   "c": "",
+   "n": "Sauggas"
+  },
+  {
+   "k": "suction_pressure",
+   "x": 51.589,
+   "y": 52.06,
+   "i": "",
+   "c": "",
+   "n": "Niederdruck"
+  },
+  {
+   "k": "hot_gas",
+   "x": 63.771,
+   "y": 69.78,
+   "i": "",
+   "c": "",
+   "n": "Heißgas"
+  },
+  {
+   "k": "return",
+   "x": 92.479,
+   "y": 36.813,
+   "i": "",
+   "c": "",
+   "n": "Rücklauf"
+  },
+  {
+   "k": "secondary_supply",
+   "x": 92.479,
+   "y": 60.989,
+   "i": "",
+   "c": "",
+   "n": "Vorlauf"
+  }
+ ],
+ "values": [
+  {
+   "k": "primary_supply",
+   "x": 8.792,
+   "y": 48.901,
+   "n": "Primärkreis",
+   "c": "sm"
+  },
+  {
+   "k": "inverter_power",
+   "x": 37.5,
+   "y": 48.901,
+   "n": "Inverter",
+   "c": "big"
+  },
+  {
+   "k": "compressor_speed",
+   "x": 51.589,
+   "y": 63.462,
+   "n": "Verdichter",
+   "c": "big dk"
+  },
+  {
+   "k": "oil_temp",
+   "x": 51.589,
+   "y": 69.78,
+   "n": "Öl",
+   "c": "sm dk"
+  },
+  {
+   "k": "motor_temp",
+   "x": 51.589,
+   "y": 72.802,
+   "n": "Motor",
+   "c": "sm dk"
+  }
+ ]
+}

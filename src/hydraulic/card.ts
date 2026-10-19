@@ -14,7 +14,7 @@ export class ViHydraulicCard extends ViCard {
   }
 
   // The water lines make sense while water flows.
-  protected override _infoLive(): boolean {
+  protected _infoLive(): boolean {
     return this._num("volumetric_flow") > 0;
   }
 

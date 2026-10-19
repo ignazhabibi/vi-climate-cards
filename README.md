@@ -60,9 +60,9 @@ test/screenshot.sh "$PWD/test/out/card.png" 760 "m=dhw&dark=1"
 | --- | --- |
 | `src/draw/` | Geometry constants, SVG drawing helpers, `layout()` |
 | `src/hydraulic/`, `src/refrigerant/` | Layouts, explanation dialog, and card class per card |
-| `src/card/` | Shared base class and types |
+| `src/card/` | Shared base class, configuration check, and types |
 | `src/styles/card.css` | Stylesheet of both cards |
-| `test/parity.test.ts` | Migration check against the former Python build |
-| `test/compare-legacy.mjs` | Pixel comparison of both test pages (former project vs. this one) |
+| `test/drawing.test.ts`, `test/snapshots/` | Snapshots of everything the cards draw; update on purpose with `npx vitest run -u` |
+| `test/config.test.ts`, `test/card.test.ts` | Configuration check and card behaviour |
 | `test/page/`, `test/screenshot.sh` | Test page with stubbed `hass`, screenshots |
 | `docs/history.md` | Design history and domain notes |

@@ -1,0 +1,74 @@
+{
+ "badges": [
+  {
+   "k": "secondary_supply",
+   "x": 43.797,
+   "y": 12.662,
+   "i": "",
+   "c": "",
+   "n": "Vorlauf"
+  },
+  {
+   "k": "return",
+   "x": 43.797,
+   "y": 45.779,
+   "i": "",
+   "c": "",
+   "n": "Rücklauf"
+  },
+  {
+   "k": "volumetric_flow",
+   "x": 65.823,
+   "y": 25,
+   "i": "",
+   "c": "",
+   "n": "Durchfluss"
+  },
+  {
+   "k": "generator_supply",
+   "x": 65.823,
+   "y": 32.468,
+   "i": "",
+   "c": "",
+   "n": "Vorlauf Erzeuger"
+  },
+  {
+   "k": "circuit_supply",
+   "x": 85.57,
+   "y": 32.468,
+   "i": "",
+   "c": "",
+   "n": "Vorlauf"
+  }
+ ],
+ "values": [
+  {
+   "k": "primary_supply",
+   "x": 18.228,
+   "y": 8.766,
+   "n": "Primärkreis",
+   "c": "sm"
+  },
+  {
+   "k": "noise_reduction",
+   "x": 18.228,
+   "y": 52.273,
+   "n": "Geräuschreduzierung",
+   "c": "sm"
+  },
+  {
+   "k": "dhw",
+   "x": 65.823,
+   "y": 68.506,
+   "n": "Warmwasser",
+   "c": "big"
+  },
+  {
+   "k": "buffer",
+   "x": 85.57,
+   "y": 68.506,
+   "n": "Puffer",
+   "c": "big"
+  }
+ ]
+}

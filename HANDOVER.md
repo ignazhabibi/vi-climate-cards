@@ -21,8 +21,9 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+139732b` (48,621 bytes, djb2 2344975736, checked in the
-  browser against the local file), which includes the cleanup below. `dashboard-heizung` uses the new card
+  build `0.1.0+f575930` (54,808 bytes, djb2 1263936152, checked in the
+  browser against the local file), which includes the cleanup and the entity
+  discovery below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
   `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
   views were checked live while the heat pump was heating (rendering, no
@@ -56,7 +57,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - The `status` template header stays for now (user decision 2026-10-19),
   although no view uses it.
 
-## Entity discovery (2026-10-19, not deployed yet)
+## Entity discovery (2026-10-19, deployed)
 
 - The cards find their entities in vi_climate_devices (v3.1.0 or later):
   on the heat pump device (`device:` or the first device whose entity reports
@@ -69,6 +70,10 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - Checked against the live instance: all 39 entities of both cards carry the
   attribute and sit on one device; `test/discovery.test.ts` resolves exactly
   the mapping of `examples/*.yaml` from that data.
+- Checked live after the deploy: a card without `entities`, given the real
+  `hass` object, found all 20 hydraulic and all 23 refrigerant parts, with no
+  difference to the hand-made mapping of the dashboards. The refrigerant
+  card's dashboard config still lists `outside_temp`, which no card draws.
 - At startup the integration's entities can be unavailable and carry no
   attribute yet; the card keeps searching while keys are open and keeps what
   it found (`_resolve()` in `base-card.ts`).
@@ -82,9 +87,9 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 
 ## Next Steps
 
-1. Deploy discovery (after the user's go-ahead); the dashboards still map
-   all entities by hand, so nothing changes visibly. Then, if the user wants,
-   drop the `entities` blocks from both cards in `dashboard-heizung`.
+1. If the user wants: drop the `entities` blocks from both cards in
+   `dashboard-heizung` (discovery finds the same entities; `outside_temp` is
+   unused anyway).
 2. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
    - HA card contract: `getConfigForm` built from the slot tables (device,

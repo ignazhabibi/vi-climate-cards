@@ -4,8 +4,8 @@
 import { assets } from "../assets";
 import type { Layout } from "../draw/layout";
 import { fill, T } from "../i18n";
-import { type ActionConfig, type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
-import { buildConfigForm } from "./editor";
+import { type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
+import { EDITOR_TAG, type ViCardEditor } from "./editor-element";
 import type { Hass, HassEntity } from "./hass";
 import type { InfoContent } from "./info";
 import { isSettled, resolveEntities } from "./resolve";
@@ -37,8 +37,28 @@ type CardClass = typeof ViCard;
 
 const L = T.card;
 
-/** How long a press must last to count as hold, as in HA's own cards. */
-const HOLD_MS = 500;
+// Viewers can pause the motion; the choice holds for all cards in this
+// browser and reaches the other cards through a window event.
+const PAUSE_KEY = "vi-climate-cards:paused";
+const PAUSE_EVENT = "vi-climate-cards-paused";
+
+function readPaused(): boolean {
+  try {
+    return localStorage.getItem(PAUSE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function writePaused(paused: boolean): void {
+  try {
+    if (paused) localStorage.setItem(PAUSE_KEY, "1");
+    else localStorage.removeItem(PAUSE_KEY);
+  } catch {
+    /* storage blocked: the choice lasts until the page reloads */
+  }
+  window.dispatchEvent(new CustomEvent(PAUSE_EVENT, { detail: paused }));
+}
 
 export abstract class ViCard extends HTMLElement {
   /** The entity keys the card draws; see slots.ts. */
@@ -63,11 +83,13 @@ export abstract class ViCard extends HTMLElement {
   /** Bundle version, e.g. in the browser console: customElements.get("vi-hydraulic-card").version */
   static readonly version = __VERSION__;
 
-  /** The visual editor, built from the card's entity keys. */
-  static getConfigForm() {
+  /** The visual editor: HA's form, filled with what the card detects. */
+  static getConfigElement(): HTMLElement {
+    const editor = document.createElement(EDITOR_TAG) as ViCardEditor;
     // `this` is the card class HA calls this on, with its own keys.
     // biome-ignore lint/complexity/noThisInStatic: ViCard.slots would be empty
-    return buildConfigForm(this.slots, this.presets);
+    editor.card = this;
+    return editor;
   }
 
   /** A new card from the card picker needs no options: it finds the heat
@@ -96,6 +118,8 @@ export abstract class ViCard extends HTMLElement {
   private _statusKey?: string;
   private _unsub?: Promise<(() => void) | undefined>;
   private _tick?: ReturnType<typeof setInterval>;
+  private _paused = readPaused();
+  private _onPaused = (ev: Event) => this._setPaused((ev as CustomEvent<boolean>).detail);
 
   private get cls(): CardClass {
     return this.constructor as CardClass;
@@ -113,6 +137,7 @@ export abstract class ViCard extends HTMLElement {
     if (
       config.status !== this._config?.status ||
       config.status_entity !== this._config?.status_entity ||
+      config.show_state !== this._config?.show_state ||
       JSON.stringify(config.status_items) !== JSON.stringify(this._config?.status_items)
     ) {
       this._unsubscribe();
@@ -140,7 +165,10 @@ export abstract class ViCard extends HTMLElement {
     const prev = this._hass;
     this._hass = hass;
     this._subscribe();
-    if (this._resolve() || !this._root) this._build();
+    const mapped = this._resolve();
+    // The header state is found with the other entities.
+    this._syncTick();
+    if (mapped || !this._root) this._build();
     else if (prev && !this._changed(prev, hass)) return;
     this._update();
     this._entityStatus();
@@ -162,7 +190,8 @@ export abstract class ViCard extends HTMLElement {
   private _watched(): string[] {
     const config = this._config;
     const ids = new Set(Object.values(this._entities));
-    if (config?.status_entity) ids.add(config.status_entity);
+    const head = this._headEntity();
+    if (head) ids.add(head);
     for (const item of config?.status_items ?? []) {
       if (typeof item === "string") {
         ids.add(item);
@@ -175,19 +204,42 @@ export abstract class ViCard extends HTMLElement {
   }
 
   connectedCallback(): void {
+    window.addEventListener(PAUSE_EVENT, this._onPaused);
+    this._setPaused(readPaused());
     this._subscribe();
     this._syncTick();
   }
 
   disconnectedCallback(): void {
+    window.removeEventListener(PAUSE_EVENT, this._onPaused);
     this._unsubscribe();
     this._syncTick();
+  }
+
+  /** The entity whose state heads the header: the detected heat pump state,
+   * or `status_entity` from older configurations. */
+  private _headEntity(): string | undefined {
+    const config = this._config;
+    if (!config || config.status) return undefined;
+    if (config.status_entity) return config.status_entity;
+    return config.show_state === false ? undefined : this._entities.state;
+  }
+
+  private _setPaused(paused: boolean): void {
+    this._paused = paused;
+    if (!this._root) return;
+    this._root.classList.toggle("still", paused || this._config?.animations === false);
+    for (const btn of this._root.querySelectorAll<HTMLElement>(".ipause")) {
+      btn.setAttribute("aria-pressed", String(paused));
+      btn.setAttribute("aria-label", paused ? L.play : L.pause);
+      btn.querySelector("ha-icon")?.setAttribute("icon", paused ? "mdi:play" : "mdi:pause");
+    }
   }
 
   // The "seit …" text of an entity status ages without a state change, so it
   // is refreshed every minute while the card shows one.
   private _syncTick(): void {
-    const needed = this.isConnected && !!this._config?.status_entity && !this._config.status;
+    const needed = this.isConnected && !!this._headEntity();
     if (needed && !this._tick) {
       this._tick = setInterval(() => this._entityStatus(), 60000);
     } else if (!needed && this._tick) {
@@ -220,16 +272,16 @@ export abstract class ViCard extends HTMLElement {
     return { columns: "full", min_columns: 6 };
   }
 
-  // Alternative to `status`: `status_entity` names an entity whose
-  // translated state is the big word, with "seit …" from its last change.
+  // Alternative to `status`: the translated state of the header entity (see
+  // _headEntity) is the big word, with "seit …" from its last change.
   // The line below lists the `status_items` entities that currently say
   // something: states that are not off and numbers above zero, as name and
   // state (or the state alone with `name: false`), and only while their
   // `visibility` conditions hold. Every part opens its more-info dialog; no
   // text is made up.
   private _entityStatus(): void {
-    const id = this._config?.status_entity;
-    if (!id || this._config?.status || !this._hass) return;
+    const id = this._headEntity();
+    if (!id || !this._hass) return;
     const s = this._hass.states[id];
     const st: Status =
       !s || s.state === "unavailable" || s.state === "unknown"
@@ -389,11 +441,19 @@ export abstract class ViCard extends HTMLElement {
     // A card with an explanation gets an info button in its header row; the
     // header is then always there, empty if there is no status.
     const info = this.cls.info && config.info !== false ? this.cls.info : null;
-    const ibtn = info
-      ? `<div class="ibtn iopen" role="button" tabindex="0" aria-label="${info.title}"><ha-icon icon="mdi:information-outline"></ha-icon></div>`
-      : "";
+    // The pause button sits left of the info button; it is hidden when the
+    // card or the system does not animate.
+    const motion = config.animations !== false;
+    const ibtn =
+      (motion
+        ? `<div class="ibtn ipause" role="button" tabindex="0" aria-pressed="false" aria-label="${L.pause}"><ha-icon icon="mdi:pause"></ha-icon></div>`
+        : "") +
+      (info
+        ? `<div class="ibtn iopen" role="button" tabindex="0" aria-label="${info.title}"><ha-icon icon="mdi:information-outline"></ha-icon></div>`
+        : "");
+    const btns = (motion ? 1 : 0) + (info ? 1 : 0);
     const hd =
-      config.status || config.status_entity || info
+      config.status || this._headEntity() || btns
         ? `<div class="hd"><div class="l1"><span class="st"></span><span class="dt"></span></div><div class="in"></div></div>`
         : "";
     const layouts = this.cls.layouts
@@ -415,13 +475,12 @@ export abstract class ViCard extends HTMLElement {
           )
           .join("");
         return (
-          `<div class="lay ${l.c}${info ? " hasinfo" : ""}">${ibtn}${hd}<div class="sc">${l.svg}` +
+          `<div class="lay ${l.c}${btns ? ` btns${btns}` : ""}">${ibtn}${hd}<div class="sc">${l.svg}` +
           `<div class="ov">${l.text}${badges}${values}</div></div></div>`
         );
       })
       .join("");
-    const still = config.animations === false ? " still" : "";
-    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap${still}">${this._missingNote()}${layouts}${this._infoDialog(info)}</div></ha-card>`;
+    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap">${this._missingNote()}${layouts}${this._infoDialog(info)}</div></ha-card>`;
     const root = shadow.querySelector(".wrap") as HTMLElement;
     this._root = root;
     this._pipes = [...root.querySelectorAll<SVGElement>(".lay .pipe, .lay .fl")];
@@ -448,7 +507,23 @@ export abstract class ViCard extends HTMLElement {
     for (const el of this._buttons) {
       el.setAttribute("role", "button");
       el.setAttribute("tabindex", "0");
-      this._bindActions(el, el.dataset.k as string);
+      const open = () => this._moreInfo(el.dataset.k as string);
+      el.addEventListener("click", open);
+      el.addEventListener("keydown", (ev) => {
+        const key = (ev as KeyboardEvent).key;
+        if (key !== "Enter" && key !== " ") return;
+        ev.preventDefault();
+        open();
+      });
+    }
+    for (const el of root.querySelectorAll<HTMLElement>(".ipause")) {
+      const toggle = () => writePaused(!this._paused);
+      el.addEventListener("click", toggle);
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key !== "Enter" && ev.key !== " ") return;
+        ev.preventDefault();
+        toggle();
+      });
     }
     // Header parts of an entity status open the entity they show.
     for (const hd of root.querySelectorAll(".hd")) {
@@ -480,6 +555,7 @@ export abstract class ViCard extends HTMLElement {
     dlg?.addEventListener("click", (ev) => {
       if (ev.target === dlg) dlg.close();
     });
+    this._setPaused(this._paused);
     this._renderStatus();
   }
 
@@ -553,52 +629,9 @@ export abstract class ViCard extends HTMLElement {
     }
   }
 
-  // A press that lasts HOLD_MS runs the hold action instead of the tap; the
-  // click that follows it is swallowed. Without a hold action a long press
-  // is a tap.
-  private _bindActions(el: HTMLElement | SVGElement, key: string): void {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let held = false;
-    const cancel = () => {
-      clearTimeout(timer);
-      timer = undefined;
-    };
-    el.addEventListener("pointerdown", () => {
-      held = false;
-      const hold = this._config?.hold_action;
-      if (!hold || hold.action === "none") return;
-      cancel();
-      timer = setTimeout(() => {
-        held = true;
-        this._act(key, "hold");
-      }, HOLD_MS);
-    });
-    for (const type of ["pointerup", "pointerleave", "pointercancel"]) el.addEventListener(type, cancel);
-    el.addEventListener("click", () => {
-      cancel();
-      if (held) held = false;
-      else this._act(key, "tap");
-    });
-    el.addEventListener("keydown", (ev) => {
-      const k = (ev as KeyboardEvent).key;
-      if (k !== "Enter" && k !== " ") return;
-      ev.preventDefault();
-      this._act(key, "tap");
-    });
-  }
-
-  // Without a configured action a tap opens more-info, as before; any other
-  // action goes to HA's action handler with the part's entity.
-  private _act(key: string, kind: "tap" | "hold"): void {
-    const entity = this._entities[key];
-    if (!entity) return;
-    const action: ActionConfig | undefined = kind === "tap" ? this._config?.tap_action : this._config?.hold_action;
-    if (!action) {
-      if (kind === "tap") this._fire("hass-more-info", { entityId: entity });
-      return;
-    }
-    if (action.action === "none") return;
-    this._fire("hass-action", { config: { entity, [`${kind}_action`]: action }, action: kind });
+  private _moreInfo(key: string): void {
+    const entityId = this._entities[key];
+    if (entityId) this._fire("hass-more-info", { entityId });
   }
 
   private _fire(type: string, detail: unknown): void {

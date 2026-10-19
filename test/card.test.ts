@@ -7,6 +7,8 @@ let ViRefrigerantCard: typeof import("../src/refrigerant/card").ViRefrigerantCar
 
 beforeAll(async () => {
   globalThis.HTMLElement ??= class {} as unknown as typeof HTMLElement;
+  // The pause choice is shared through window events.
+  globalThis.window ??= { addEventListener() {}, removeEventListener() {} } as unknown as Window & typeof globalThis;
   ({ ViRefrigerantCard } = await import("../src/refrigerant/card"));
 });
 
@@ -115,36 +117,41 @@ describe("updates", () => {
   });
 });
 
-describe("actions", () => {
-  type Inner = { _entities: Record<string, string>; _act(key: string, kind: "tap" | "hold"): void };
+describe("taps", () => {
+  type Inner = { _entities: Record<string, string>; _moreInfo(key: string): void };
 
-  const fired = (cfg: Partial<CardConfig>, key: string, kind: "tap" | "hold") => {
+  it("open more-info of the tapped part", () => {
     const card = new ViRefrigerantCard();
     const events: { type: string; detail: unknown }[] = [];
     (card as unknown as { dispatchEvent: (e: CustomEvent) => boolean }).dispatchEvent = (e) => {
       events.push({ type: e.type, detail: e.detail });
       return true;
     };
-    card.setConfig({ ...config, ...cfg });
+    card.setConfig(config);
     (card as unknown as Inner)._entities = { compressor: "binary_sensor.c" };
-    (card as unknown as Inner)._act(key, kind);
-    return events;
-  };
-
-  it("opens more-info on tap by default and does nothing on hold", () => {
-    expect(fired({}, "compressor", "tap")).toEqual([
-      { type: "hass-more-info", detail: { entityId: "binary_sensor.c" } },
-    ]);
-    expect(fired({}, "compressor", "hold")).toEqual([]);
+    (card as unknown as Inner)._moreInfo("compressor");
     // A part without entity is not tappable.
-    expect(fired({}, "oil_temp", "tap")).toEqual([]);
+    (card as unknown as Inner)._moreInfo("oil_temp");
+    expect(events).toEqual([{ type: "hass-more-info", detail: { entityId: "binary_sensor.c" } }]);
   });
+});
 
-  it("hands configured actions to Home Assistant with the part's entity", () => {
-    const nav = { action: "navigate", navigation_path: "/config" };
-    expect(fired({ hold_action: nav }, "compressor", "hold")).toEqual([
-      { type: "hass-action", detail: { config: { entity: "binary_sensor.c", hold_action: nav }, action: "hold" } },
-    ]);
-    expect(fired({ tap_action: { action: "none" } }, "compressor", "tap")).toEqual([]);
+describe("header", () => {
+  type Inner = { _entities: Record<string, string>; _headEntity(): string | undefined };
+
+  it("shows the detected heat pump state unless turned off or replaced", () => {
+    const card = new ViRefrigerantCard();
+    const inner = card as unknown as Inner;
+    card.setConfig({ type: "x" });
+    inner._entities = { state: "sensor.phase" };
+    expect(inner._headEntity()).toBe("sensor.phase");
+    card.setConfig({ type: "x", show_state: false });
+    inner._entities = { state: "sensor.phase" };
+    expect(inner._headEntity()).toBeUndefined();
+    card.setConfig({ type: "x", status_entity: "sensor.other" });
+    expect(inner._headEntity()).toBe("sensor.other");
+    card.setConfig({ type: "x", status: "{{ 1 }}" });
+    inner._entities = { state: "sensor.phase" };
+    expect(inner._headEntity()).toBeUndefined();
   });
 });

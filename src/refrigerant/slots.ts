@@ -8,6 +8,7 @@ const sensor = (key: string, label: string, feature: string): Slot => ({ key, la
 /** Everything the refrigerant circuit shows (Vitocal 250-A). */
 export const REFRIGERANT_SLOTS: Slot[] = [
   { ...C.compressor, required: true },
+  C.state,
   C.primary_supply,
   fanSlot("fan_1", 0),
   fanSlot("fan_2", 1),

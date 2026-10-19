@@ -37,20 +37,20 @@ required parts it cannot find. `preset:` selects the drawing variant; each
 card has one so far (`vitocal-250a-buffer`, `vitocal-250a`).
 
 Both cards appear in the card picker with a live preview and have a visual
-editor: heat pump device, header state, the explanation button, motion,
-under "Entitäten anpassen" every part's entity, and under "Interaktionen" the
-tap and hold actions. `status_items` stays YAML.
+editor. It shows what the card detects: the heat pump in the device field
+and each part's entity under "Entitäten anpassen", marked "Automatisch
+erkannt", "Eigene Wahl", or "Nicht gefunden". Only deviations are saved; a
+cleared field goes back to automatic. `status_items` stays YAML.
 
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `device` | first heat pump | Device of vi_climate_devices |
 | `entities` | discovered | Entity per part; `null` hides a part |
 | `preset` | only variant | Drawing variant |
-| `status_entity`, `status_items`, `status` | none | Header, see below |
+| `show_state` | `true` | Heat pump state in the header (`entities.state`) |
+| `status_items`, `status` | none | Header, see below |
 | `info` | `true` | Info button with the explanation |
 | `animations` | `true` | `false` stops pipes, fans, and air |
-| `tap_action` | more-info | HA action for a tapped part, with its entity |
-| `hold_action` | none | HA action for a held part |
 
 ## Behaviour
 
@@ -60,14 +60,22 @@ tap and hold actions. `status_items` stays YAML.
 - Values take three forms: measuring points on the pipes are badges, a
   device's main value is a big number inside it, minor values are small text.
 - Tapping a badge, a small value, or a drawn device opens the entity's
-  more-info dialog, or runs `tap_action` / `hold_action`. Every such part is
-  reachable with the keyboard (Tab, Enter, Space) and named for screen
-  readers with its state.
+  more-info dialog. Every such part is reachable with the keyboard (Tab,
+  Enter, Space), named for screen readers with its state, and at least 24 px
+  high as a tap target.
+- A pause button next to the info button stops the motion for the viewer
+  (remembered in the browser, for all cards); it is hidden when the system
+  asks for reduced motion.
+- Pipes reach 3:1 contrast against card and devices in light and dark mode;
+  styles use HA's tokens (`--ha-space-*`, `--ha-border-radius-*`,
+  `--ha-font-*`, `--ha-color-focus`) with the theme's text and card colors.
 - The card redraws only when one of its own entities, the theme mode, or the
   language changes.
-- Optional header: `status_entity` (state as the big word, "seit …" from its
-  last change) with `status_items` for the line below, or `status`, a template
-  returning `{"state", "detail", "info"}`.
+- Header: the heat pump state the card finds (`entities.state`, the
+  integration's operating phase) as the big word with "seit …" from its last
+  change, and `status_items` for the line below; or `status`, a template
+  returning `{"state", "detail", "info"}`. `status_entity` from older
+  configurations still replaces the detected state.
 - An info button opens an explanation for laypeople (`info: false` hides it).
 
 Configuration examples with the full entity mapping and the header in use:

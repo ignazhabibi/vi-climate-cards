@@ -12,9 +12,9 @@ grid_options:
 # in the dashboard). The template returns state, detail, and info:
 # status: >-
 #   {{ {'state': 'Bereit', 'detail': 'seit 12 Min.', 'info': 'Puffer 30 °C'} | to_json }}
-# In use: an entity (state, "seit …" from its last change) plus the entities
-# for the line below, each shown only while it says something:
-status_entity: sensor.keller_warmepumpe_warmepumpe_zustand  # Betriebsphase
+# In use: the heat pump state, found by the card (entities.state below), with
+# "seit …" from its last change, plus the entities for the line below, each
+# shown only while it says something:
 status_items:
   - entity: binary_sensor.e3_vitocal_16_heizkreispumpe_heizkreis_0
     visibility:  # only while the heat pump is off (heating from the buffer)
@@ -34,6 +34,8 @@ status_items:
         state_not: "on"
   - sensor.keller_warmepumpe_heizstab
 entities:
+  # Header: the operating phase (show_state: false hides it)
+  state: sensor.keller_warmepumpe_warmepumpe_zustand
   # Required
   valve: sensor.e3_vitocal_16_4_3_wege_ventil_position
   volumetric_flow: sensor.e3_vitocal_16_volumenstrom

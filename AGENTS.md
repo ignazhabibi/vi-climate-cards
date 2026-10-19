@@ -101,8 +101,13 @@ lives only in `src/i18n/de.ts`; code takes it from there (`T`, `fill()`).
   and not with the option `animations: false` (class `.still`).
 - Every tappable part is a button for the keyboard and screen readers
   (`role`, `tabindex`, `aria-label` with the part name and state), with a
-  focus ring on badges and a glow on drawn parts. Taps and holds go through
-  `_act()`: more-info by default, otherwise HA's `hass-action`.
+  focus ring (`--ha-color-focus`) on badges and a glow on drawn parts. A tap
+  always opens more-info (the user decided against card-wide actions:
+  each part has its own entity). Viewers can pause the motion.
+- Contrast: pipes keep 3:1 against card and devices in both modes (see the
+  `--warm-k`, `--cold-k`, `--off-k` mixes); check new colors with numbers.
+- The editor (`editor-element.ts`, logic in `editor.ts`) shows the detected
+  device and entities and saves only deviations.
 - Valve state values come from the integration's enum sensor. Some keys look
   misspelled (`climat_circuit_two_defrost`, `climat_circuit_one_and_two`); they
   are the real API values. Keep them.

@@ -149,6 +149,31 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   "Bewegung zeigen" and "Interaktionen" (tap: more-info, hold: none), and
   switching motion off stopped the preview.
 
+## Review follow-up (2026-10-19, not deployed yet)
+
+- Card-wide `tap_action` / `hold_action` removed again (user decision: every
+  part has its own entity, so a tap always opens more-info).
+- Header state is discovered: slot `state` (translation key
+  `heat_pump_state`) on both cards, switch `show_state` (default on).
+  `status_entity` still works and replaces it; the dashboards still set it
+  and could drop it (ask first).
+- New editor element (`getConfigElement`, HA's `ha-form` inside): device and
+  entity fields show what the card detects, helpers say "Automatisch
+  erkannt" / "Eigene Wahl" / "Ausgeblendet" / "Nicht gefunden", and only
+  deviations are saved (`configFromForm`). Checked in headless Chrome with a
+  stand-in form; not yet checked live in HA.
+- Viewer pause button (WCAG 2.2.2) left of the info button, remembered in
+  localStorage for all cards, hidden with reduced motion.
+- Contrast: inactive pipes 1.45:1 → 3:1 and more (lightest gray mixed from
+  the text color); orange and blue darkened in light mode only (2.8 → 3.5,
+  3.1 → 3.4). Focus in `--ha-color-focus`. Spacing, radii, and weights use
+  `--ha-*` tokens; text and card colors stay the theme's legacy variables,
+  which user themes set.
+- Small values have 24 px tap targets. Open: "Öl" and "Motor" are 16–23 px
+  apart, so their targets overlap slightly; a full fix needs more spacing in
+  the refrigerant drawing (user to decide).
+
 ## Next Steps
 
-1. `documentationURL` once the repository is public.
+1. Commit, deploy, check the new editor live in HA.
+2. `documentationURL` once the repository is public.

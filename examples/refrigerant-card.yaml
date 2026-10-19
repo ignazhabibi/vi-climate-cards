@@ -9,7 +9,6 @@ type: custom:vi-refrigerant-card
 grid_options:
   columns: full
 # Header: the Betriebsphase, below it at most two values.
-status_entity: sensor.keller_warmepumpe_warmepumpe_zustand
 status_items:
   - entity: sensor.keller_warmepumpe_production_current
     name: Wärmeleistung  # hidden at 0, so only while running
@@ -22,6 +21,8 @@ status_items:
         entity: binary_sensor.e3_vitocal_16_verdichter_0
         state: "off"
 entities:
+  # Header: the operating phase (show_state: false hides it)
+  state: sensor.keller_warmepumpe_warmepumpe_zustand
   # Required
   compressor: binary_sensor.e3_vitocal_16_verdichter_0
   # Optional (a badge, value, or symbol is hidden when its entity is missing)

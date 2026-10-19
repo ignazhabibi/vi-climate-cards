@@ -46,6 +46,7 @@ export const de = {
 
   /** Name of each entity key, in the editor and for screen readers. */
   parts: {
+    state: "Zustand in der Kopfzeile",
     valve: "4/3-Wege-Ventil",
     volumetric_flow: "Durchfluss",
     compressor: "Verdichter",
@@ -96,6 +97,8 @@ export const de = {
     close: "Schließen",
     lines: "In den Leitungen",
     now: "Jetzt: {text}",
+    pause: "Bewegung anhalten",
+    play: "Bewegung fortsetzen",
   },
 
   /** Errors of setConfig; Home Assistant shows them instead of the card. */
@@ -104,7 +107,6 @@ export const de = {
     entities: "entities muss eine Zuordnung Schlüssel → Entität sein",
     device: "device muss eine Geräte-ID sein",
     preset: 'preset "{preset}" unbekannt, möglich: {presets}',
-    action: "{name} braucht eine Aktion (action)",
     itemEntity: "status_items: entity fehlt",
     condition: 'status_items: Bedingung "{condition}" wird nicht unterstützt, nur "state"',
     conditionEntity: "status_items: Bedingung ohne entity",
@@ -115,24 +117,25 @@ export const de = {
     labels: {
       device: "Wärmepumpe",
       preset: "Variante",
-      status_entity: "Zustand in der Kopfzeile",
+      show_state: "Zustand in der Kopfzeile",
       info: "Erklärung anbieten",
       animations: "Bewegung zeigen",
-      tap_action: "Beim Tippen",
-      hold_action: "Beim Gedrückthalten",
     } as Record<string, string>,
     helpers: {
-      device:
-        "Gerät der Integration Viessmann Climate Devices; leer: die erste Wärmepumpe. " +
-        "Die Karte findet ihre Entitäten dort selbst. Unter „Entitäten anpassen“ lässt sich jede einzeln ersetzen.",
-      status_entity: "Ihr Zustand steht groß oben, mit „seit …“, zum Beispiel die Betriebsphase.",
+      device: "Die Karte findet ihre Entitäten an diesem Gerät der Integration Viessmann Climate Devices.",
+      show_state: "Die Betriebsphase der Wärmepumpe groß oben, mit „seit …“.",
       info: "Ein Info-Button erklärt die Anlage für Laien.",
-      animations: "Aus: Leitungen und Ventilatoren stehen still, die Farben zeigen den Zustand weiter.",
-      tap_action: "Gilt für jedes Teil der Zeichnung mit seiner Entität; ohne Angabe öffnet es die Details.",
-      hold_action: "Gilt für jedes Teil der Zeichnung mit seiner Entität.",
+      animations:
+        "Aus: Leitungen und Ventilatoren stehen still, die Farben zeigen den Zustand weiter. " +
+        "Betrachter können die Bewegung auch auf der Karte anhalten.",
     } as Record<string, string>,
     entities: "Entitäten anpassen",
-    interactions: "Interaktionen",
+    /** Status of a field: what the card uses and where it comes from. */
+    auto: "Automatisch erkannt.",
+    autoDevice: "Automatisch erkannt: die erste Wärmepumpe der Integration.",
+    own: "Eigene Wahl; leeren für automatisch.",
+    hidden: "Ausgeblendet (entities in YAML).",
+    notFound: "Nicht gefunden; bitte auswählen.",
   },
 
   hydraulic: {

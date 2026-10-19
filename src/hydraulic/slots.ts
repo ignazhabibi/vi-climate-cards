@@ -14,6 +14,7 @@ export const HYDRAULIC_SLOTS: Slot[] = [
     feature: "heating.valves.fourThreeWay.position",
   },
   { ...C.volumetric_flow, required: true },
+  C.state,
   C.compressor,
   C.primary_supply,
   fanSlot("fan", 0),

@@ -23,6 +23,9 @@ export interface Slot {
 
 /** Measured values and states shared by both cards. */
 export const COMMON_SLOTS: Record<string, Slot> = {
+  // The operating phase for the header; it shares its feature with the
+  // heating rod stage, so the translation key finds it.
+  state: { key: "state", label: P.state, domain: "sensor", translationKey: "heat_pump_state" },
   compressor: {
     key: "compressor",
     label: P.compressor,

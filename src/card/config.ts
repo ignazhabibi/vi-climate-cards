@@ -22,13 +22,6 @@ export interface StatusItemConfig {
   visibility?: StateCondition[];
 }
 
-/** A Home Assistant action, as the `ui_action` selector writes it
- * (`more-info`, `navigate`, `perform-action`, `none`, …). */
-export interface ActionConfig {
-  action: string;
-  [key: string]: unknown;
-}
-
 export interface CardConfig {
   type: string;
   /** Device of the vi_climate_devices integration; without it the card takes
@@ -41,7 +34,10 @@ export interface CardConfig {
   entities?: Record<string, string | null | undefined>;
   /** Template for the header; returns {state, detail, info} or plain text. */
   status?: string;
-  /** Entity whose state heads the header, with "seit …" from its last change. */
+  /** `false` hides the heat pump state in the header. */
+  show_state?: boolean;
+  /** Entity for the header instead of the heat pump state (`entities.state`);
+   * kept for configurations from before discovery. */
   status_entity?: string;
   /** Entities for the header line below the state. */
   status_items?: (string | StatusItemConfig)[];
@@ -49,10 +45,6 @@ export interface CardConfig {
   info?: boolean;
   /** `false` stops pipes, fans, and air; colors still show the state. */
   animations?: boolean;
-  /** What tapping a part does, with the part's entity; default: more-info. */
-  tap_action?: ActionConfig;
-  /** What holding a part does; default: nothing beyond a tap. */
-  hold_action?: ActionConfig;
 }
 
 /** The entity a condition looks at, in either shape. */
@@ -69,10 +61,6 @@ export function checkConfig(config: CardConfig, presets: string[]): void {
   if (config.device !== undefined && typeof config.device !== "string") throw new Error(C.device);
   if (config.preset !== undefined && !presets.includes(config.preset)) {
     throw new Error(fill(C.preset, { preset: config.preset, presets: presets.join(", ") }));
-  }
-  for (const name of ["tap_action", "hold_action"] as const) {
-    const action = config[name];
-    if (action !== undefined && typeof action?.action !== "string") throw new Error(fill(C.action, { name }));
   }
   for (const item of config.status_items ?? []) {
     if (typeof item === "string") continue;

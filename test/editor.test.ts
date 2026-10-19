@@ -11,6 +11,7 @@ describe("card editor", () => {
     expect(field(schema, "device")?.selector).toEqual({ device: { filter: { integration: "vi_climate_devices" } } });
     expect(field(schema, "status_entity")?.selector).toEqual({ entity: {} });
     expect(field(schema, "info")).toMatchObject({ default: true, selector: { boolean: {} } });
+    expect(field(schema, "animations")).toMatchObject({ default: true, selector: { boolean: {} } });
     // One drawing variant: nothing to choose.
     expect(field(schema, "preset")).toBeUndefined();
     expect(field(buildConfigForm(HYDRAULIC_SLOTS, ["a", "b"]).schema, "preset")?.selector).toEqual({
@@ -38,5 +39,14 @@ describe("card editor", () => {
     expect(form.computeLabel({ name: "superheat" })).toBe("Überhitzung");
     expect(form.computeHelper({ name: "device" })).toContain("Viessmann Climate Devices");
     expect(form.computeHelper({ name: "valve_1" })).toBeUndefined();
+  });
+
+  it("offers tap and hold actions as top-level options", () => {
+    const interactions = field(buildConfigForm(HYDRAULIC_SLOTS, []).schema, "interactions");
+    expect(interactions).toMatchObject({ type: "expandable", flatten: true });
+    expect(interactions?.schema?.map((f) => [f.name, f.selector])).toEqual([
+      ["tap_action", { ui_action: { default_action: "more-info" } }],
+      ["hold_action", { ui_action: { default_action: "none" } }],
+    ]);
   });
 });

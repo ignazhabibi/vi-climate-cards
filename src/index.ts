@@ -1,6 +1,7 @@
 // vi-climate-cards: Home Assistant dashboard cards for the Viessmann
 // Vitocal 250-A. Registers both cards; this file is the bundle entry.
 import { ViHydraulicCard } from "./hydraulic/card";
+import { T } from "./i18n";
 import { ViRefrigerantCard } from "./refrigerant/card";
 
 declare global {
@@ -9,17 +10,12 @@ declare global {
   }
 }
 
-const cards: [type: string, cls: CustomElementConstructor, name: string, description: string][] = [
-  [
-    "vi-hydraulic-card",
-    ViHydraulicCard,
-    "Viessmann Anlagenschema",
-    "Hydraulikschema der Vitocal 250-A mit Live-Werten",
-  ],
-  ["vi-refrigerant-card", ViRefrigerantCard, "Viessmann Kältekreis", "Kältekreis der Vitocal 250-A mit Live-Werten"],
+const cards: [type: string, cls: CustomElementConstructor, texts: { name: string; description: string }][] = [
+  ["vi-hydraulic-card", ViHydraulicCard, T.cards.hydraulic],
+  ["vi-refrigerant-card", ViRefrigerantCard, T.cards.refrigerant],
 ];
 
-for (const [type, cls, name, description] of cards) {
+for (const [type, cls, { name, description }] of cards) {
   if (customElements.get(type)) continue;
   customElements.define(type, cls);
   window.customCards = window.customCards || [];

@@ -11,7 +11,8 @@ and tradeoffs when they materially affect the result.
 
 Communicate with the user in German. Write code, comments, identifiers, and
 repository documentation in English; project, file, and element names are
-English too. User-facing card text (labels, explanations) is German.
+English too. User-facing card text (labels, explanations) is German and
+lives only in `src/i18n/de.ts`; code takes it from there (`T`, `fill()`).
 
 ## Project Context
 
@@ -58,7 +59,9 @@ English too. User-facing card text (labels, explanations) is German.
   - `styles/card.css`: the stylesheet; `%NAME%` placeholders are filled from
     the constants in `styles/index.ts`.
   - `assets.ts`: computes layouts, dialogs, and CSS once on first use.
-  - `index.ts`: registers the cards and the former names as aliases.
+  - `i18n/`: the dictionary (`de.ts`) with every text the cards and the
+    editor show; `Texts` is its shape for a later second language.
+  - `index.ts`: registers the cards and their card picker entries.
 - All geometry uses SVG viewBox units (hydraulic: wide 790 × 616, narrow
   400 × 674; refrigerant: wide 944 × 728, narrow 400 × 768). Badge overlays
   are positioned in percent of that box; `layout()` computes the
@@ -82,6 +85,8 @@ English too. User-facing card text (labels, explanations) is German.
   sky and a strip of lawn) is the link to reality. Keep it sparse: devices and
   surroundings use a few neutral tokens on `.wrap` with dark variants on
   `.wrap.dark` (`--dev`, `--devd`, `--devl`, `--shade`, `--ground`, `--wall`);
+  `--dev` and `--devl` derive from the theme's text and card colors through
+  `color-mix` (mix shares `--dev-k`, `--devl-k` per mode);
   only the pipes carry color (`--warm`, `--cold`), plus the muted lawn green.
   The user found a more realistic, colorful version too busy. Check every
   change in light and dark mode.
@@ -92,7 +97,12 @@ English too. User-facing card text (labels, explanations) is German.
   one row. Check alignment visually, not only by numbers.
 - Colors: supply `--warm`, return `--cold`, inactive `--off`. The same pipe
   path is drawn twice: a `.pipe` stroke and a `.fl` flow-dot overlay.
-- Animations run only inside `@media (prefers-reduced-motion: no-preference)`.
+- Animations run only inside `@media (prefers-reduced-motion: no-preference)`,
+  and not with the option `animations: false` (class `.still`).
+- Every tappable part is a button for the keyboard and screen readers
+  (`role`, `tabindex`, `aria-label` with the part name and state), with a
+  focus ring on badges and a glow on drawn parts. Taps and holds go through
+  `_act()`: more-info by default, otherwise HA's `hass-action`.
 - Valve state values come from the integration's enum sensor. Some keys look
   misspelled (`climat_circuit_two_defrost`, `climat_circuit_one_and_two`); they
   are the real API values. Keep them.

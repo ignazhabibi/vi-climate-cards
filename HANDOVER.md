@@ -113,13 +113,37 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   "Gerät auswählen" (the label "Wärmepumpe" is set and used as `aria-label`;
   entity pickers do show theirs). The helper text below explains the field.
 
+## Plan items done (2026-10-19, not deployed yet)
+
+- Texts: every card and editor text is in `src/i18n/de.ts` (`T`, `fill()`);
+  the drawing snapshots stayed byte-identical through the move.
+- Keyboard and screen readers: badges, small values, and drawn parts are
+  buttons (Tab, Enter, Space) with `aria-label` "<part>: <state>"; the SVG is
+  a `group` so its parts are reachable; header links are buttons too. Focus
+  shows a ring on badges and a glow on drawn parts (checked in light and
+  dark, wide and narrow).
+- Actions: `tap_action` (default more-info) and `hold_action` (default
+  none), in the editor under "Interaktionen" (`ui_action` selectors, flat
+  keys). Other actions go to HA as `hass-action` with the part's entity;
+  checked live on HA 2026.10.2 that HA handles that event.
+- `animations: false` (editor "Bewegung zeigen") stops pipes, fans, and air.
+- Device body and outline (`--dev`, `--devl`) derive from the theme via
+  `color-mix`; light and dark renders match the former colors (dark is a
+  shade more neutral).
+- Big values use HA's `formatEntityStateToParts` for unit and spacing with
+  the number rounded; header item names use `formatEntityName` (both with
+  the former code as fallback).
+- The card redraws only when its own entities, header entities, the
+  registry, the theme mode, or HA's formatters change (`_changed()`); the
+  former per-update state key is gone.
+- Checked in headless Chrome: labels, Enter and click open more-info, a hold
+  runs the hold action and swallows the following click, no animation with
+  `animations: false`, no redraw on an unrelated entity. Bundle 62.7 KB
+  (was 55.9 KB): the dictionary structure and the new behaviour.
+- Not done: `documentationURL` needs a public repository.
+
 ## Next Steps
 
-1. Plan agreed with the user (own instance, built publish-ready):
-   - Texts into a dictionary (German only for now).
-   - HA card contract, rest: `documentationURL` once the repository is
-     public; render only on changes of the card's own entities.
-   - Keyboard access and labels for every tappable element, focus ring,
-     optional tap/hold actions, an option to stop animations.
-   - Device colors derived from the theme; big values through
-     `formatEntityStateToParts`, names through `formatEntityName`.
+1. Commit, deploy, and check live: both views, the editor's new fields
+   ("Bewegung zeigen", "Interaktionen"), keyboard focus on the dashboard.
+2. `documentationURL` once the repository is public.

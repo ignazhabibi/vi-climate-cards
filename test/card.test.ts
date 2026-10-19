@@ -77,3 +77,74 @@ describe("entity resolution", () => {
     expect(inner._entities.valve_1).toBe(valve1);
   });
 });
+
+describe("updates", () => {
+  type Inner = { _entities: Record<string, string>; _changed(prev: unknown, next: unknown): boolean };
+  const state = (s: string) => ({ entity_id: "x", state: s, last_changed: "", attributes: {} });
+  const fmt = () => "";
+
+  it("redraws only when something the card shows changed", () => {
+    const card = new ViRefrigerantCard();
+    const inner = card as unknown as Inner;
+    card.setConfig({
+      ...config,
+      status_entity: "sensor.phase",
+      status_items: [
+        { entity: "sensor.rod", visibility: [{ condition: "state", entity: "binary_sensor.ww", state: "on" }] },
+      ],
+    });
+    inner._entities = { compressor: "binary_sensor.c" };
+    const states = {
+      "binary_sensor.c": state("on"),
+      "sensor.phase": state("heating"),
+      "sensor.rod": state("off"),
+      "binary_sensor.ww": state("off"),
+      "sensor.other": state("1"),
+    };
+    const prev = { states, formatEntityState: fmt };
+    const next = (id: string) => ({ states: { ...states, [id]: state("new") }, formatEntityState: fmt });
+
+    expect(inner._changed(prev, { states: { ...states }, formatEntityState: fmt })).toBe(false);
+    expect(inner._changed(prev, next("sensor.other"))).toBe(false);
+    for (const id of ["binary_sensor.c", "sensor.phase", "sensor.rod", "binary_sensor.ww"]) {
+      expect(inner._changed(prev, next(id))).toBe(true);
+    }
+    // New translations or a theme switch redraw everything.
+    expect(inner._changed(prev, { states, formatEntityState: () => "x" })).toBe(true);
+    expect(inner._changed(prev, { states, formatEntityState: fmt, themes: { darkMode: true } })).toBe(true);
+  });
+});
+
+describe("actions", () => {
+  type Inner = { _entities: Record<string, string>; _act(key: string, kind: "tap" | "hold"): void };
+
+  const fired = (cfg: Partial<CardConfig>, key: string, kind: "tap" | "hold") => {
+    const card = new ViRefrigerantCard();
+    const events: { type: string; detail: unknown }[] = [];
+    (card as unknown as { dispatchEvent: (e: CustomEvent) => boolean }).dispatchEvent = (e) => {
+      events.push({ type: e.type, detail: e.detail });
+      return true;
+    };
+    card.setConfig({ ...config, ...cfg });
+    (card as unknown as Inner)._entities = { compressor: "binary_sensor.c" };
+    (card as unknown as Inner)._act(key, kind);
+    return events;
+  };
+
+  it("opens more-info on tap by default and does nothing on hold", () => {
+    expect(fired({}, "compressor", "tap")).toEqual([
+      { type: "hass-more-info", detail: { entityId: "binary_sensor.c" } },
+    ]);
+    expect(fired({}, "compressor", "hold")).toEqual([]);
+    // A part without entity is not tappable.
+    expect(fired({}, "oil_temp", "tap")).toEqual([]);
+  });
+
+  it("hands configured actions to Home Assistant with the part's entity", () => {
+    const nav = { action: "navigate", navigation_path: "/config" };
+    expect(fired({ hold_action: nav }, "compressor", "hold")).toEqual([
+      { type: "hass-action", detail: { config: { entity: "binary_sensor.c", hold_action: nav }, action: "hold" } },
+    ]);
+    expect(fired({ tap_action: { action: "none" } }, "compressor", "tap")).toEqual([]);
+  });
+});

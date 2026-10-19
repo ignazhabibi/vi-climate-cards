@@ -16,8 +16,9 @@ integration, which provides the live values.
   (gas, liquid, droplets behind the valve); in defrost the circuit reverses.
 
 Both cards are one JavaScript file without runtime dependencies. They use the Home
-Assistant theme variables, so light and dark mode follow the HA theme. Card
-text is German.
+Assistant theme variables, so light and dark mode follow the HA theme; the
+device bodies take their tint from the theme's text and card colors. Card
+text is German, kept in one dictionary (`src/i18n/de.ts`).
 
 ## Configuration
 
@@ -36,8 +37,20 @@ required parts it cannot find. `preset:` selects the drawing variant; each
 card has one so far (`vitocal-250a-buffer`, `vitocal-250a`).
 
 Both cards appear in the card picker with a live preview and have a visual
-editor: heat pump device, header state, the explanation button, and under
-"Entitäten anpassen" every part's entity. `status_items` stays YAML.
+editor: heat pump device, header state, the explanation button, motion,
+under "Entitäten anpassen" every part's entity, and under "Interaktionen" the
+tap and hold actions. `status_items` stays YAML.
+
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `device` | first heat pump | Device of vi_climate_devices |
+| `entities` | discovered | Entity per part; `null` hides a part |
+| `preset` | only variant | Drawing variant |
+| `status_entity`, `status_items`, `status` | none | Header, see below |
+| `info` | `true` | Info button with the explanation |
+| `animations` | `true` | `false` stops pipes, fans, and air |
+| `tap_action` | more-info | HA action for a tapped part, with its entity |
+| `hold_action` | none | HA action for a held part |
 
 ## Behaviour
 
@@ -47,7 +60,11 @@ editor: heat pump device, header state, the explanation button, and under
 - Values take three forms: measuring points on the pipes are badges, a
   device's main value is a big number inside it, minor values are small text.
 - Tapping a badge, a small value, or a drawn device opens the entity's
-  more-info dialog.
+  more-info dialog, or runs `tap_action` / `hold_action`. Every such part is
+  reachable with the keyboard (Tab, Enter, Space) and named for screen
+  readers with its state.
+- The card redraws only when one of its own entities, the theme mode, or the
+  language changes.
 - Optional header: `status_entity` (state as the big word, "seit …" from its
   last change) with `status_items` for the line below, or `status`, a template
   returning `{"state", "detail", "info"}`.
@@ -82,6 +99,7 @@ test/screenshot.sh "$PWD/test/out/card.png" 760 "m=dhw&dark=1"
 | --- | --- |
 | `src/draw/` | Geometry constants, SVG drawing helpers, `layout()` |
 | `src/hydraulic/`, `src/refrigerant/` | Layouts, explanation dialog, and card class per card |
+| `src/i18n/` | Dictionary of all card and editor texts |
 | `src/card/` | Shared base class, configuration check, entity keys (`slots.ts`), resolution, types |
 | `src/sources/vi-climate-devices.ts` | Finds the entities in the vi_climate_devices integration |
 | `src/hydraulic/slots.ts`, `src/refrigerant/slots.ts` | Entity keys per card with their Viessmann features |

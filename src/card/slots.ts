@@ -1,11 +1,14 @@
 // The entity keys a card draws, as data: what each one shows, which domain it
 // expects, and how the vi_climate_devices integration provides it. Discovery
-// and, later, the card editor are built from these tables.
+// and the card editor are built from these tables.
+import { fill, T } from "../i18n";
+
+const P = T.parts;
 
 export interface Slot {
   /** Key in the card's `entities` option. */
   key: string;
-  /** What the drawing shows for it (German, as on the card). */
+  /** Name of the part, from the dictionary. */
   label: string;
   domain: "sensor" | "binary_sensor" | "water_heater" | "climate";
   /** The card cannot draw without it. */
@@ -22,37 +25,37 @@ export interface Slot {
 export const COMMON_SLOTS: Record<string, Slot> = {
   compressor: {
     key: "compressor",
-    label: "Verdichter",
+    label: P.compressor,
     domain: "binary_sensor",
     feature: "heating.compressors.0.active",
   },
   primary_supply: {
     key: "primary_supply",
-    label: "Primärkreis",
+    label: P.primary_supply,
     domain: "sensor",
     feature: "heating.primaryCircuit.sensors.temperature.supply",
   },
   secondary_supply: {
     key: "secondary_supply",
-    label: "Vorlauf Sekundärkreis",
+    label: P.secondary_supply,
     domain: "sensor",
     feature: "heating.secondaryCircuit.sensors.temperature.supply",
   },
   return: {
     key: "return",
-    label: "Rücklauf",
+    label: P.return,
     domain: "sensor",
     feature: "heating.sensors.temperature.return",
   },
   volumetric_flow: {
     key: "volumetric_flow",
-    label: "Durchfluss",
+    label: P.volumetric_flow,
     domain: "sensor",
     feature: "heating.sensors.volumetricFlow.allengra",
   },
   defrost: {
     key: "defrost",
-    label: "Abtauen",
+    label: P.defrost,
     domain: "binary_sensor",
     feature: "heating.outdoor.defrosting.active",
   },
@@ -61,7 +64,7 @@ export const COMMON_SLOTS: Record<string, Slot> = {
 /** A fan of the outdoor unit; index 0 is the first fan. */
 export const fanSlot = (key: string, index: number): Slot => ({
   key,
-  label: `Ventilator ${index + 1}`,
+  label: fill(P.fan, { n: index + 1 }),
   domain: "sensor",
   feature: `heating.primaryCircuit.fans.${index}.current`,
 });

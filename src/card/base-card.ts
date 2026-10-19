@@ -3,7 +3,8 @@
 // `_apply()`, which maps entity states onto the drawing.
 import { assets } from "../assets";
 import type { Layout } from "../draw/layout";
-import { type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
+import { fill, T } from "../i18n";
+import { type ActionConfig, type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
 import { buildConfigForm } from "./editor";
 import type { Hass, HassEntity } from "./hass";
 import type { InfoContent } from "./info";
@@ -33,6 +34,11 @@ interface BadgeRef {
 }
 
 type CardClass = typeof ViCard;
+
+const L = T.card;
+
+/** How long a press must last to count as hold, as in HA's own cards. */
+const HOLD_MS = 500;
 
 export abstract class ViCard extends HTMLElement {
   /** The entity keys the card draws; see slots.ts. */
@@ -77,13 +83,14 @@ export abstract class ViCard extends HTMLElement {
   private _registry?: Hass["entities"];
   private _settled = false;
   protected _root?: HTMLElement;
-  protected _key?: string;
   protected _pipes: SVGElement[] = [];
   protected _ptrs: SVGElement[] = [];
   protected _fans: SVGElement[] = [];
   protected _pumps: SVGElement[] = [];
   protected _heaters: SVGElement[] = [];
   protected _badgeEls: BadgeRef[] = [];
+  /** Every tappable part, for its spoken label. */
+  private _buttons: (HTMLElement | SVGElement)[] = [];
   protected _dlg?: HTMLDialogElement | null;
   private _status?: Status;
   private _statusKey?: string;
@@ -113,21 +120,58 @@ export abstract class ViCard extends HTMLElement {
       this._statusKey = undefined;
     }
     this._config = config;
-    this._key = undefined;
     this._entities = {};
     this._registry = undefined;
     this._resolve();
-    if (this._root) this._build();
+    if (this._root) {
+      this._build();
+      this._update();
+      this._entityStatus();
+    }
     this._subscribe();
     this._syncTick();
   }
 
+  // HA sets hass on every state change in the instance. The card redraws
+  // only when something it shows changed: a state object of its entities
+  // (HA replaces those only on change), the registry, the theme mode, or
+  // the formatters (they change when language or translations load).
   set hass(hass: Hass) {
+    const prev = this._hass;
     this._hass = hass;
-    if (this._resolve() || !this._root) this._build();
-    this._update();
     this._subscribe();
+    if (this._resolve() || !this._root) this._build();
+    else if (prev && !this._changed(prev, hass)) return;
+    this._update();
     this._entityStatus();
+  }
+
+  private _changed(prev: Hass, next: Hass): boolean {
+    if (
+      prev.entities !== next.entities ||
+      prev.devices !== next.devices ||
+      prev.themes?.darkMode !== next.themes?.darkMode ||
+      prev.formatEntityState !== next.formatEntityState
+    ) {
+      return true;
+    }
+    return this._watched().some((id) => prev.states[id] !== next.states[id]);
+  }
+
+  /** Every entity the card reads: its parts and the header's entities. */
+  private _watched(): string[] {
+    const config = this._config;
+    const ids = new Set(Object.values(this._entities));
+    if (config?.status_entity) ids.add(config.status_entity);
+    for (const item of config?.status_items ?? []) {
+      if (typeof item === "string") {
+        ids.add(item);
+        continue;
+      }
+      ids.add(item.entity);
+      for (const c of item.visibility ?? []) ids.add(conditionEntity(c) as string);
+    }
+    return [...ids];
   }
 
   connectedCallback(): void {
@@ -189,7 +233,7 @@ export abstract class ViCard extends HTMLElement {
     const s = this._hass.states[id];
     const st: Status =
       !s || s.state === "unavailable" || s.state === "unknown"
-        ? { state: "Keine Daten", detail: "", items: [], stateId: id }
+        ? { state: L.noData, detail: "", items: [], stateId: id }
         : {
             state: this._hass.formatEntityState(s),
             detail: this._since(s.last_changed),
@@ -234,7 +278,10 @@ export abstract class ViCard extends HTMLElement {
   }
 
   // Entity name without the device name in front, as HA shows it on cards.
+  // Before HA had formatEntityName, the device name was cut off here.
   private _entityName(s: HassEntity): string {
+    const name = this._hass?.formatEntityName?.(s, { type: "entity" });
+    if (name) return name;
     const full = s.attributes.friendly_name || s.entity_id;
     const ent = this._hass?.entities?.[s.entity_id];
     const dev = ent?.device_id && this._hass?.devices?.[ent.device_id];
@@ -244,11 +291,11 @@ export abstract class ViCard extends HTMLElement {
 
   private _since(iso: string): string {
     const m = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
-    if (m < 1) return "gerade eben";
-    if (m < 60) return `seit ${m} Min.`;
-    if (m < 1440) return `seit ${Math.round(m / 60)} Std.`;
+    if (m < 1) return L.justNow;
+    if (m < 60) return fill(L.minutes, { n: m });
+    if (m < 1440) return fill(L.hours, { n: Math.round(m / 60) });
     const d = Math.round(m / 1440);
-    return `seit ${d} ${d === 1 ? "Tag" : "Tagen"}`;
+    return d === 1 ? L.day : fill(L.days, { n: d });
   }
 
   // Optional status header: `status` is a template that HA renders, like the
@@ -305,6 +352,13 @@ export abstract class ViCard extends HTMLElement {
       head.textContent = st.state ?? "";
       head.classList.toggle("lnk", !!st.stateId);
       head.dataset.id = st.stateId || "";
+      if (st.stateId) {
+        head.role = "button";
+        head.tabIndex = 0;
+      } else {
+        head.removeAttribute("role");
+        head.removeAttribute("tabindex");
+      }
       (hd.querySelector(".dt") as HTMLElement).textContent = st.detail ?? "";
       const info = hd.querySelector(".in") as HTMLElement;
       info.classList.toggle("err", !!st.err);
@@ -314,6 +368,8 @@ export abstract class ViCard extends HTMLElement {
             const el = document.createElement("span");
             el.className = "lnk";
             el.dataset.id = it.id;
+            el.role = "button";
+            el.tabIndex = 0;
             el.textContent = it.text;
             return i ? [document.createTextNode(" · "), el] : [el];
           }),
@@ -364,7 +420,8 @@ export abstract class ViCard extends HTMLElement {
         );
       })
       .join("");
-    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap">${this._missingNote()}${layouts}${this._infoDialog(info)}</div></ha-card>`;
+    const still = config.animations === false ? " still" : "";
+    shadow.innerHTML = `<style>${this.cls.css}</style><ha-card><div class="wrap${still}">${this._missingNote()}${layouts}${this._infoDialog(info)}</div></ha-card>`;
     const root = shadow.querySelector(".wrap") as HTMLElement;
     this._root = root;
     this._pipes = [...root.querySelectorAll<SVGElement>(".lay .pipe, .lay .fl")];
@@ -382,19 +439,28 @@ export abstract class ViCard extends HTMLElement {
     for (const el of root.querySelectorAll<SVGElement>(".tap")) {
       if (!this._entities[el.dataset.k as string]) el.classList.remove("tap");
     }
-    // Badges, small readings, and tappable devices open the more-info dialog.
-    for (const el of root.querySelectorAll<HTMLElement | SVGElement>(".bd, .vv.sm, .tap")) {
-      el.addEventListener("click", () => this._moreInfo(el.dataset.k as string));
+    // The drawing is a group of controls, not one picture, so screen readers
+    // reach the parts inside it.
+    for (const svg of root.querySelectorAll(".lay > .sc > svg")) svg.setAttribute("role", "group");
+    // Badges, small readings, and tappable devices are buttons: tap, hold,
+    // Enter, and Space run the configured action with the part's entity.
+    this._buttons = [...root.querySelectorAll<HTMLElement | SVGElement>(".bd, .vv.sm, .tap")];
+    for (const el of this._buttons) {
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      this._bindActions(el, el.dataset.k as string);
     }
     // Header parts of an entity status open the entity they show.
     for (const hd of root.querySelectorAll(".hd")) {
-      hd.addEventListener("click", (ev) => {
+      const open = (ev: Event) => {
         const id = (ev.target as Element).closest?.<HTMLElement>(".lnk")?.dataset.id;
-        if (id) {
-          this.dispatchEvent(
-            new CustomEvent("hass-more-info", { detail: { entityId: id }, bubbles: true, composed: true }),
-          );
-        }
+        if (id) this._fire("hass-more-info", { entityId: id });
+        return !!id;
+      };
+      hd.addEventListener("click", open);
+      hd.addEventListener("keydown", (ev) => {
+        const key = (ev as KeyboardEvent).key;
+        if ((key === "Enter" || key === " ") && open(ev)) ev.preventDefault();
       });
     }
     // The info button opens the explanation; Esc, the close button, and a tap
@@ -414,7 +480,6 @@ export abstract class ViCard extends HTMLElement {
     dlg?.addEventListener("click", (ev) => {
       if (ev.target === dlg) dlg.close();
     });
-    this._key = undefined;
     this._renderStatus();
   }
 
@@ -423,10 +488,7 @@ export abstract class ViCard extends HTMLElement {
     if (!this._hass) return "";
     const missing = this.cls.slots.filter((s) => s.required && !this._entities[s.key]).map((s) => s.label);
     if (!missing.length) return "";
-    return (
-      `<div class="miss">Es fehlt: ${missing.join(", ")}. Die Karte findet ihre Entitäten am Gerät der ` +
-      "Integration „Viessmann Climate Devices“ (Option device) oder nimmt sie aus der Option entities.</div>"
-    );
+    return `<div class="miss">${fill(L.missing, { parts: missing.join(", ") })}</div>`;
   }
 
   // Explanation dialog: a native <dialog> in the top layer, so no ancestor
@@ -453,9 +515,9 @@ export abstract class ViCard extends HTMLElement {
       .join("");
     return (
       `<dialog class="inf" aria-label="${info.title}"><div class="ih">` +
-      `<div class="ibtn iclose" role="button" tabindex="0" aria-label="Schließen"><ha-icon icon="mdi:close"></ha-icon></div>` +
+      `<div class="ibtn iclose" role="button" tabindex="0" aria-label="${L.close}"><ha-icon icon="mdi:close"></ha-icon></div>` +
       `<h2>${info.title}</h2></div><div class="ibd" tabindex="-1"><p>${info.intro}</p><div class="ist"></div>${steps}` +
-      `<div class="leg"><h4>In den Leitungen</h4><div>${legend}</div></div>` +
+      `<div class="leg"><h4>${L.lines}</h4><div>${legend}</div></div>` +
       `<div class="tips">${tips}</div></div></dialog>`
     );
   }
@@ -486,15 +548,65 @@ export abstract class ViCard extends HTMLElement {
         return s ? hass.formatEntityState(s) : "";
       });
       const show = live || step.always;
-      (el.querySelector(".now") as HTMLElement).textContent = show && !missing ? `Jetzt: ${text}` : "";
+      (el.querySelector(".now") as HTMLElement).textContent = show && !missing ? fill(L.now, { text }) : "";
       el.querySelector("svg")?.classList.toggle("spin", live);
     }
   }
 
-  private _moreInfo(key: string): void {
-    const entityId = this._entities[key];
-    if (!entityId) return;
-    this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
+  // A press that lasts HOLD_MS runs the hold action instead of the tap; the
+  // click that follows it is swallowed. Without a hold action a long press
+  // is a tap.
+  private _bindActions(el: HTMLElement | SVGElement, key: string): void {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let held = false;
+    const cancel = () => {
+      clearTimeout(timer);
+      timer = undefined;
+    };
+    el.addEventListener("pointerdown", () => {
+      held = false;
+      const hold = this._config?.hold_action;
+      if (!hold || hold.action === "none") return;
+      cancel();
+      timer = setTimeout(() => {
+        held = true;
+        this._act(key, "hold");
+      }, HOLD_MS);
+    });
+    for (const type of ["pointerup", "pointerleave", "pointercancel"]) el.addEventListener(type, cancel);
+    el.addEventListener("click", () => {
+      cancel();
+      if (held) held = false;
+      else this._act(key, "tap");
+    });
+    el.addEventListener("keydown", (ev) => {
+      const k = (ev as KeyboardEvent).key;
+      if (k !== "Enter" && k !== " ") return;
+      ev.preventDefault();
+      this._act(key, "tap");
+    });
+  }
+
+  // Without a configured action a tap opens more-info, as before; any other
+  // action goes to HA's action handler with the part's entity.
+  private _act(key: string, kind: "tap" | "hold"): void {
+    const entity = this._entities[key];
+    if (!entity) return;
+    const action: ActionConfig | undefined = kind === "tap" ? this._config?.tap_action : this._config?.hold_action;
+    if (!action) {
+      if (kind === "tap") this._fire("hass-more-info", { entityId: entity });
+      return;
+    }
+    if (action.action === "none") return;
+    this._fire("hass-action", { config: { entity, [`${kind}_action`]: action }, action: kind });
+  }
+
+  private _fire(type: string, detail: unknown): void {
+    this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true, composed: true }));
+  }
+
+  private _label(key: string): string {
+    return this.cls.slots.find((s) => s.key === key)?.label ?? key;
   }
 
   protected _state(key: string): HassEntity | undefined {
@@ -509,13 +621,19 @@ export abstract class ViCard extends HTMLElement {
   }
 
   // Big readings (tank content, device value) as whole numbers: "51 °C".
+  // HA's parts give the unit and its spacing; only the number is rounded.
   private _whole(s: HassEntity): string {
     const hass = this._hass as Hass;
     const v = parseFloat(s.state);
     if (!Number.isFinite(v)) return hass.formatEntityState(s);
     const lang = hass.locale?.language || hass.language || "de";
+    const whole = Math.round(v).toLocaleString(lang);
+    const parts = hass.formatEntityStateToParts?.(s);
+    if (parts?.some((p) => p.type === "value")) {
+      return parts.map((p) => (p.type === "value" ? whole : p.value)).join("");
+    }
     const unit = s.attributes?.unit_of_measurement;
-    return Math.round(v).toLocaleString(lang) + (unit ? ` ${unit}` : "");
+    return whole + (unit ? ` ${unit}` : "");
   }
 
   protected _fanDur(speed: number): string {
@@ -527,10 +645,6 @@ export abstract class ViCard extends HTMLElement {
     const config = this._config;
     const root = this._root;
     if (!hass || !root || !config) return;
-    const keys = Object.keys(this._entities);
-    const key = keys.map((k) => this._state(k)?.state).join("|") + (hass.themes?.darkMode ? "D" : "L");
-    if (key === this._key) return;
-    this._key = key;
 
     for (const b of this._badgeEls) {
       const s = this._state(b.key);
@@ -538,6 +652,14 @@ export abstract class ViCard extends HTMLElement {
       b.val.textContent = !s ? "—" : b.big && !na ? this._whole(s) : hass.formatEntityState(s);
       b.el.classList.toggle("na", na);
       b.el.style.display = this._entities[b.key] ? "" : "none";
+    }
+    // Screen readers hear the part's full name and its state; the drawing
+    // shows a short name next to its pipe.
+    for (const el of this._buttons) {
+      const k = el.dataset.k as string;
+      const s = this._state(k);
+      const label = this._label(k);
+      el.setAttribute("aria-label", s ? `${label}: ${hass.formatEntityState(s)}` : label);
     }
     // A heater coil turns warm while it runs (binary on, or a heating rod stage).
     for (const h of this._heaters) {

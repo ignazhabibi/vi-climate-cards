@@ -1,9 +1,13 @@
 // Turns the drawing of one layout into what the card renders: the SVG, the
 // text overlay, and the positions of badges and values in percent of the
 // viewBox, plus the layout's scale rules for the stylesheet.
+
+import { T } from "../i18n";
 import { GAP } from "./constants";
 import { fixed, roundTo } from "./num";
 import type { Defs } from "./primitives";
+
+const D = T.drawing;
 
 /** A text label in the overlay: class, x, y, text (may contain <br>). */
 export type LabelSpec = [cls: string, x: number, y: number, text: string];
@@ -57,7 +61,7 @@ export interface LayoutSpec {
 }
 
 export function layout(s: LayoutSpec): { layout: Layout; css: string } {
-  const { name, w, h, vx = 0, vy = 0, label = "Anlagenschema", umin = 0.85 } = s;
+  const { name, w, h, vx = 0, vy = 0, label = D.schematic, umin = 0.85 } = s;
   const px = (x: number) => roundTo((x / w) * 100, 3);
   const py = (y: number) => roundTo((y / h) * 100, 3);
   const pct = (x: number, y: number) => `left:${fixed((x / w) * 100, 3)}%;top:${fixed((y / h) * 100, 3)}%`;

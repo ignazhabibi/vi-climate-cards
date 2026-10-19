@@ -2,6 +2,7 @@
 // (getConfigForm). The entities come from vi_climate_devices; the expandable
 // section replaces single ones. Options the form does not show, such as
 // `status_items`, stay in the YAML.
+import { T } from "../i18n";
 import { PLATFORM } from "../sources/vi-climate-devices";
 import type { Slot } from "./slots";
 
@@ -9,6 +10,8 @@ export interface FormField {
   name: string;
   type?: "expandable";
   title?: string;
+  /** Expandable only: its fields stay top-level keys of the configuration. */
+  flatten?: boolean;
   default?: unknown;
   selector?: Record<string, unknown>;
   schema?: FormField[];
@@ -20,20 +23,7 @@ export interface ConfigForm {
   computeHelper: (field: { name: string }) => string | undefined;
 }
 
-const LABELS: Record<string, string> = {
-  device: "Wärmepumpe",
-  preset: "Variante",
-  status_entity: "Zustand in der Kopfzeile",
-  info: "Erklärung anbieten",
-};
-
-const HELPERS: Record<string, string> = {
-  device:
-    "Gerät der Integration Viessmann Climate Devices; leer: die erste Wärmepumpe. " +
-    "Die Karte findet ihre Entitäten dort selbst. Unter „Entitäten anpassen“ lässt sich jede einzeln ersetzen.",
-  status_entity: "Ihr Zustand steht groß oben, mit „seit …“, zum Beispiel die Betriebsphase.",
-  info: "Ein Info-Button erklärt die Anlage für Laien.",
-};
+const E = T.editor;
 
 export function buildConfigForm(slots: Slot[], presets: string[]): ConfigForm {
   const schema: FormField[] = [{ name: "device", selector: { device: { filter: { integration: PLATFORM } } } }];
@@ -43,17 +33,29 @@ export function buildConfigForm(slots: Slot[], presets: string[]): ConfigForm {
   schema.push(
     { name: "status_entity", selector: { entity: {} } },
     { name: "info", default: true, selector: { boolean: {} } },
+    { name: "animations", default: true, selector: { boolean: {} } },
     {
       type: "expandable",
       name: "entities",
-      title: "Entitäten anpassen",
+      title: E.entities,
       schema: slots.map((s) => ({ name: s.key, selector: { entity: { filter: { domain: s.domain } } } })),
+    },
+    // As on HA's own cards: one action for all parts, each with its entity.
+    {
+      type: "expandable",
+      name: "interactions",
+      title: E.interactions,
+      flatten: true,
+      schema: [
+        { name: "tap_action", selector: { ui_action: { default_action: "more-info" } } },
+        { name: "hold_action", selector: { ui_action: { default_action: "none" } } },
+      ],
     },
   );
   const slotLabels: Record<string, string> = Object.fromEntries(slots.map((s) => [s.key, s.label]));
   return {
     schema,
-    computeLabel: (field) => LABELS[field.name] ?? slotLabels[field.name],
-    computeHelper: (field) => HELPERS[field.name],
+    computeLabel: (field) => E.labels[field.name] ?? slotLabels[field.name],
+    computeHelper: (field) => E.helpers[field.name],
   };
 }

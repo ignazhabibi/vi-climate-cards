@@ -3,6 +3,7 @@
 // water flows (tank temperatures stay meaningful at rest).
 import { type InfoContent, infoTile } from "../card/info";
 import { fan } from "../draw/primitives";
+import { T } from "../i18n";
 
 function outdoorUnit(): string {
   const waves = [22, 32, 42].map((y) => `<path d='M2 ${y} q3 -3 6 0 t6 0'/>`).join("");
@@ -38,58 +39,21 @@ const hotWater = (): string =>
       "<path class='drop' d='M50 31 C46 37 46 41 50 41 C54 41 54 37 50 31 Z'/>",
   );
 
-export const hydraulicInfo = (): InfoContent => ({
-  title: "So funktioniert die Anlage",
-  intro:
-    "Die Außeneinheit erwärmt Wasser. Die Anlage bringt es dorthin, wo Wärme gebraucht wird, in diesen vier " +
-    "Schritten:",
-  run: "Gerade fließt Wasser. Bei jedem Schritt steht, was gerade passiert.",
-  off: "Gerade fließt kein Wasser zur Außeneinheit. Sobald sie läuft, steht bei jedem Schritt, was gerade passiert.",
-  defrost: "Gerade wird abgetaut (siehe unten).",
-  legend: [
-    ["on s", "", "Vorlauf, warm"],
-    ["on r", "", "Rücklauf, abgekühlt"],
-  ],
-  steps: [
-    {
-      t: "Erwärmen",
-      svg: outdoorUnit(),
-      p:
-        "In der Außeneinheit gibt der Kältekreis seine Wärme an das Wasser ab. Warm fließt es zur Inneneinheit, " +
-        "abgekühlt kommt es zurück.",
-      now: "Hin {secondary_supply} · zurück {return}",
-    },
-    {
-      t: "Verteilen",
-      svg: valve(),
-      p:
-        "Eine Pumpe hält das Wasser in Bewegung. Ein Ventil schickt es zur Heizung oder in den " +
-        "Warmwasserspeicher. Bei Bedarf hilft ein Heizstab.",
-      now: "Durchfluss {volumetric_flow} · Vorlauf {generator_supply}",
-    },
-    {
-      t: "Heizen",
-      svg: heating(),
-      p: "Der Pufferspeicher sammelt das warme Wasser. Von dort bringt die Heizkreispumpe es zu den Heizkörpern.",
-      now: "Puffer {buffer} · Heizkreis {circuit_supply}",
-      always: true,
-    },
-    {
-      t: "Warmwasser",
-      svg: hotWater(),
-      p:
-        "Der Speicher hält das Wasser zum Duschen und Spülen warm. Die Zirkulationspumpe sorgt dafür, dass es " +
-        "schnell warm aus dem Hahn kommt.",
-      now: "Speicher {dhw}",
-      always: true,
-    },
-  ],
-  tips: [
-    {
-      t: "Abtauen",
-      p:
-        "Bei Frost vereist die Außeneinheit. Zum Abtauen holt sie sich kurz Wärme aus dem Abtaupuffer in der " +
-        "Inneneinheit.",
-    },
-  ],
-});
+export function hydraulicInfo(): InfoContent {
+  const x = T.hydraulic.info;
+  const svgs = [outdoorUnit(), valve(), heating(), hotWater()];
+  return {
+    title: x.title,
+    intro: x.intro,
+    run: x.run,
+    off: x.off,
+    defrost: x.defrost,
+    legend: [
+      ["on s", "", x.legend[0]],
+      ["on r", "", x.legend[1]],
+    ],
+    // Heizen and Warmwasser: tank temperatures stay meaningful at rest.
+    steps: x.steps.map((s, i) => ({ t: s.t, svg: svgs[i], p: s.p, now: s.now, ...(i >= 2 ? { always: true } : {}) })),
+    tips: x.tips,
+  };
+}

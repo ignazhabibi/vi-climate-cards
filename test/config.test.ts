@@ -34,4 +34,12 @@ describe("checkConfig", () => {
     expect(() => checkConfig(item({ condition: "state", entity: "sensor.x" }), [])).toThrow("state oder state_not");
     expect(() => checkConfig(withItems([{ name: "x" } as never]), [])).toThrow("status_items: entity fehlt");
   });
+
+  it("reads tap and hold actions", () => {
+    const nav = { action: "navigate", navigation_path: "/config" };
+    expect(() => checkConfig({ ...base, tap_action: nav, hold_action: { action: "none" } }, [])).not.toThrow();
+    expect(() => checkConfig({ ...base, hold_action: {} } as unknown as CardConfig, [])).toThrow(
+      "hold_action braucht eine Aktion",
+    );
+  });
 });

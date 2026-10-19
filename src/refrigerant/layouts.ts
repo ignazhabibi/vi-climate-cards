@@ -26,6 +26,9 @@ import {
   wire,
   wireDown,
 } from "../draw/primitives";
+import { T } from "../i18n";
+
+const D = T.drawing;
 
 function wide() {
   // Heating: the liquid runs along the top from the condenser through
@@ -130,43 +133,43 @@ function wide() {
     heater(CCX, ROW3, "base_heater"),
   ];
   const labels: LabelSpec[] = [
-    ["cap", OUT_X, TITLE_Y, "Außenluft"],
-    ["title", ox + div(ow, 2), TITLE_Y, "Außeneinheit"],
-    ["cap", SEC_X, TITLE_Y, "Sekundärkreis"],
+    ["cap", OUT_X, TITLE_Y, D.outdoorAir],
+    ["title", ox + div(ow, 2), TITLE_Y, D.outdoorUnit],
+    ["cap", SEC_X, TITLE_Y, D.secondaryCircuit],
     // Device names as on the defrost buffer; the upright condenser has its
     // name turned, the finned coil a plate that masks the fins.
-    ["dv", CCX, div(FAN1_Y + FAN2_Y, 2), "Verdampfer"], // centered between the fans
-    ["dl", IHX[0] + div(IHX[2], 2), IHX_SY, "Interner<br>Wärmetauscher"],
-    ["dl v", KX, COND[1] + div(COND[3], 2), "Verflüssiger"],
+    ["dv", CCX, div(FAN1_Y + FAN2_Y, 2), D.evaporator], // centered between the fans
+    ["dl", IHX[0] + div(IHX[2], 2), IHX_SY, D.internalHeatExchanger],
+    ["dl v", KX, COND[1] + div(COND[3], 2), D.condenser],
   ];
   // Same rules as in the schematic: badges only for measuring points on the
   // pipes, without icons; a device shows its own main value inside it
   // (inverter power, compressor speed) and minor values small (Öl, Motor,
   // Primärkreis); the fans show their speed by turning and open on tap.
   const badges: BadgeSpec[] = [
-    ["valve_2", EEV2_X, VB_Y, "", "", "Ventil 2"],
-    ["valve_1", EEV1_X, VB_Y, "", "", "Ventil 1"],
-    ["evaporator_liquid", CCX, LB_Y, "", "", "Flüssiggas"],
+    ["valve_2", EEV2_X, VB_Y, "", "", D.valve2],
+    ["valve_1", EEV1_X, VB_Y, "", "", D.valve1],
+    ["evaporator_liquid", CCX, LB_Y, "", "", D.liquidGas],
     // The liquid sensor for heating sits between expansion valve 1 and the
     // internal heat exchanger (service manual, Abb. 133).
-    ["economizer_liquid", IHX_R, LB_Y, "", "", "Flüssiggas"],
-    ["condenser_liquid", KX, LB_Y, "", "", "Flüssiggas"],
+    ["economizer_liquid", IHX_R, LB_Y, "", "", D.liquidGas],
+    ["condenser_liquid", KX, LB_Y, "", "", D.liquidGas],
     // From the suction gas sensor behind the 4-way valve, so the badge stays
     // on the suction side in defrost too.
-    ["superheat", V4X, SUC1_Y, "", "", "Überhitzung"], // on the Sauggas row
-    ["suction_temp", MX, SUC1_Y, "", "", "Sauggas"],
-    ["suction_pressure", MX, SUC2_Y, "", "", "Niederdruck"],
-    ["hot_gas", div(COMP[0] + COMP[2] + V4X - V4R, 2), V4Y, "", "", "Heißgas"],
-    ["return", SEC_X, RL_Y, "", "", "Rücklauf"],
-    ["secondary_supply", SEC_X, VL_Y, "", "", "Vorlauf"],
+    ["superheat", V4X, SUC1_Y, "", "", D.superheat], // on the Sauggas row
+    ["suction_temp", MX, SUC1_Y, "", "", D.suctionGas],
+    ["suction_pressure", MX, SUC2_Y, "", "", D.lowPressure],
+    ["hot_gas", div(COMP[0] + COMP[2] + V4X - V4R, 2), V4Y, "", "", D.hotGas],
+    ["return", SEC_X, RL_Y, "", "", D.return],
+    ["secondary_supply", SEC_X, VL_Y, "", "", D.supply],
   ];
   const values: ValueSpec[] = [
-    ["primary_supply", OUT_X, div(FAN1_Y + FAN2_Y, 2), "Primärkreis", "sm"], // on the Verdampfer row
-    ["inverter_power", IX, INV_Y, "Inverter", "big"],
-    ["compressor_speed", MX, ROW1, "Verdichter", "big dk"],
+    ["primary_supply", OUT_X, div(FAN1_Y + FAN2_Y, 2), D.primaryCircuit, "sm"], // on the Verdampfer row
+    ["inverter_power", IX, INV_Y, D.inverter, "big"],
+    ["compressor_speed", MX, ROW1, D.compressor, "big dk"],
     // Öl on the Heißgas row, Motor close below as a pair.
-    ["oil_temp", MX, ROW2, "Öl", "sm dk"],
-    ["motor_temp", MX, ROW2 + 22, "Motor", "sm dk"],
+    ["oil_temp", MX, ROW2, D.oil, "sm dk"],
+    ["motor_temp", MX, ROW2 + 22, D.motor, "sm dk"],
   ];
   // Badges reach full size at the same card width as in the hydraulic
   // schematic, so both cards show them at one size.
@@ -179,7 +182,7 @@ function wide() {
     labels,
     badges,
     values,
-    label: "Kältekreis",
+    label: D.refrigerantCircuit,
     unit: 790,
     umin: 0.9,
   });
@@ -280,32 +283,32 @@ function narrow() {
     heater(div(MX + RX, 2), COIL[1] + div(COIL[3], 2), "base_heater"),
   ];
   const labels: LabelSpec[] = [
-    ["title", div(W, 2), TITLE_Y, "Außeneinheit"],
-    ["dv", div(COIL[0] + MX, 2), COIL[1] + div(COIL[3], 2), "Verdampfer"],
-    ["dl", MX - 10, EY, "Interner<br>Wärmetauscher"], // centered on the lit face, left of the shade
-    ["dl", COND[0] + div(COND[2], 2), COND[1] + div(COND[3], 2), "Verflüssiger"],
+    ["title", div(W, 2), TITLE_Y, D.outdoorUnit],
+    ["dv", div(COIL[0] + MX, 2), COIL[1] + div(COIL[3], 2), D.evaporator],
+    ["dl", MX - 10, EY, D.internalHeatExchanger], // centered on the lit face, left of the shade
+    ["dl", COND[0] + div(COND[2], 2), COND[1] + div(COND[3], 2), D.condenser],
   ];
   const badges: BadgeSpec[] = [
-    ["evaporator_liquid", MX, ROW1, "", "", "Flüssiggas"],
+    ["evaporator_liquid", MX, ROW1, "", "", D.liquidGas],
     // Between expansion valve 1 and the internal heat exchanger.
-    ["economizer_liquid", LX, LROW1, "", "", "Flüssiggas"],
-    ["superheat", RX, ROW2, "", "", "Überhitzung"],
-    ["suction_temp", MX, SUC1_Y, "", "", "Sauggas"],
-    ["suction_pressure", MX, SUC2_Y, "", "", "Niederdruck"],
-    ["hot_gas", RX, SUC1_Y, "", "", "Heißgas"],
-    ["condenser_liquid", LX, LROW3, "", "", "Flüssiggas"],
-    ["secondary_supply", VL_X, WAT_Y, "", "", "Vorlauf"],
-    ["return", RL_X, WAT_Y, "", "", "Rücklauf"],
+    ["economizer_liquid", LX, LROW1, "", "", D.liquidGas],
+    ["superheat", RX, ROW2, "", "", D.superheat],
+    ["suction_temp", MX, SUC1_Y, "", "", D.suctionGas],
+    ["suction_pressure", MX, SUC2_Y, "", "", D.lowPressure],
+    ["hot_gas", RX, SUC1_Y, "", "", D.hotGas],
+    ["condenser_liquid", LX, LROW3, "", "", D.liquidGas],
+    ["secondary_supply", VL_X, WAT_Y, "", "", D.supply],
+    ["return", RL_X, WAT_Y, "", "", D.return],
   ];
   const values: ValueSpec[] = [
     // Beside the fans, off the title row; two lines to fit the narrow space.
-    ["primary_supply", div(265 + ox + ow - 8, 2), FAN_Y, "Primärkreis", "sm st"],
-    ["inverter_power", INV[0] + div(INV[2], 2), INV[1] + div(INV[3], 2), "Inverter", "big"],
-    ["compressor_speed", RX, CROW1, "Verdichter", "big dk"],
-    ["oil_temp", RX, CROW2, "Öl", "sm dk"],
-    ["motor_temp", RX, CROW2 + 22, "Motor", "sm dk"],
+    ["primary_supply", div(265 + ox + ow - 8, 2), FAN_Y, D.primaryCircuit, "sm st"],
+    ["inverter_power", INV[0] + div(INV[2], 2), INV[1] + div(INV[3], 2), D.inverter, "big"],
+    ["compressor_speed", RX, CROW1, D.compressor, "big dk"],
+    ["oil_temp", RX, CROW2, D.oil, "sm dk"],
+    ["motor_temp", RX, CROW2 + 22, D.motor, "sm dk"],
   ];
-  return layout({ name: "narrow rfn", w: W, h: H, defs, body, labels, badges, values, label: "Kältekreis" });
+  return layout({ name: "narrow rfn", w: W, h: H, defs, body, labels, badges, values, label: D.refrigerantCircuit });
 }
 
 export const refrigerantLayouts = () => [wide(), narrow()];

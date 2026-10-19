@@ -31,6 +31,9 @@ import {
   tap,
   valve,
 } from "../draw/primitives";
+import { T } from "../i18n";
+
+const D = T.drawing;
 
 function wide() {
   // Outside on the left (faint sky, lawn, outdoor unit), a thick house wall,
@@ -142,28 +145,28 @@ function wide() {
     heater(RISER_X, SUP_Y, "heater"),
   ];
   const labels: LabelSpec[] = [
-    ["cap", OCX, TITLE_Y, "Außenluft"],
-    ["title", OCX, ODU_TITLE_Y, "Außeneinheit"],
-    ["cap", SEC_X, TITLE_Y, "Sekundärkreis"],
-    ["title", IDU[0] + div(IDU[2], 2), TITLE_Y, "Inneneinheit"],
-    ["cap", BCX, TITLE_Y, "Heizkreis"],
-    ["dl", RISER_X, VY, "Abtaupuffer"],
-    ["dl", VX, CIRC_Y, "Zirkulation"], // inside the tank, at its outlet
+    ["cap", OCX, TITLE_Y, D.outdoorAir],
+    ["title", OCX, ODU_TITLE_Y, D.outdoorUnit],
+    ["cap", SEC_X, TITLE_Y, D.secondaryCircuit],
+    ["title", IDU[0] + div(IDU[2], 2), TITLE_Y, D.indoorUnit],
+    ["cap", BCX, TITLE_Y, D.heatingCircuit],
+    ["dl", RISER_X, VY, D.defrostBuffer],
+    ["dl", VX, CIRC_Y, D.circulation], // inside the tank, at its outlet
   ];
   // Badges only for measuring points, without icons: the pipe color and the
   // position already say what is measured.
   const badges: BadgeSpec[] = [
-    ["secondary_supply", SEC_X, SUP_Y, "", "", "Vorlauf"],
-    ["return", SEC_X, RET_Y, "", "", "Rücklauf"],
-    ["volumetric_flow", VX, FLOW_Y, "", "", "Durchfluss"],
-    ["generator_supply", VX, GEN_Y, "", "", "Vorlauf Erzeuger"],
-    ["circuit_supply", BCX, GEN_Y, "", "", "Vorlauf"],
+    ["secondary_supply", SEC_X, SUP_Y, "", "", D.supply],
+    ["return", SEC_X, RET_Y, "", "", D.return],
+    ["volumetric_flow", VX, FLOW_Y, "", "", D.flow],
+    ["generator_supply", VX, GEN_Y, "", "", D.generatorSupply],
+    ["circuit_supply", BCX, GEN_Y, "", "", D.supply],
   ];
   const values: ValueSpec[] = [
-    ["primary_supply", OCX, TITLE_Y + 20, "Primärkreis", "sm"], // under Außenluft
-    ["noise_reduction", OCX, ODU[1] - 16, "Geräuschreduzierung", "sm"],
-    ["dhw", VX, TANK_VALUE_Y, "Warmwasser", "big"],
-    ["buffer", BCX, TANK_VALUE_Y, "Puffer", "big"],
+    ["primary_supply", OCX, TITLE_Y + 20, D.primaryCircuit, "sm"], // under Außenluft
+    ["noise_reduction", OCX, ODU[1] - 16, D.noiseReduction, "sm"],
+    ["dhw", VX, TANK_VALUE_Y, D.hotWater, "big"],
+    ["buffer", BCX, TANK_VALUE_Y, D.buffer, "big"],
   ];
   return layout({ name: "wide", w: W, h: H, defs, body, labels, badges, values, vx: VX, vy: VY, umin: 0.9 });
 }
@@ -274,27 +277,27 @@ function narrow() {
     heater(SX, HEAT_Y, "heater"),
   ];
   const labels: LabelSpec[] = [
-    ["title", COL_X, ODU[1] + 29, "Außeneinheit"],
-    ["cap", CX, SEC_Y, "Sekundärkreis"],
-    ["title", AX, TITLE_Y, "Inneneinheit"],
-    ["cap", CX, TITLE_Y, "Heizkreis"],
-    ["dl", AX, VY, "Abtaupuffer"],
-    ["dl", SX, CIRC_Y, "Zirkulation"],
+    ["title", COL_X, ODU[1] + 29, D.outdoorUnit],
+    ["cap", CX, SEC_Y, D.secondaryCircuit],
+    ["title", AX, TITLE_Y, D.indoorUnit],
+    ["cap", CX, TITLE_Y, D.heatingCircuit],
+    ["dl", AX, VY, D.defrostBuffer],
+    ["dl", SX, CIRC_Y, D.circulation],
   ];
   const badges: BadgeSpec[] = [
-    ["return", RX, SEC_Y, "", "", "Rücklauf"],
-    ["secondary_supply", SX, SEC_Y, "", "", "Vorlauf"],
-    ["volumetric_flow", SX, FLOW_Y, "", "", "Durchfluss"],
-    ["generator_supply", SX, ROW_Y, "", "", "Vorlauf Erzeuger"],
-    ["circuit_supply", CX, ROW_Y, "", "", "Vorlauf"],
+    ["return", RX, SEC_Y, "", "", D.return],
+    ["secondary_supply", SX, SEC_Y, "", "", D.supply],
+    ["volumetric_flow", SX, FLOW_Y, "", "", D.flow],
+    ["generator_supply", SX, ROW_Y, "", "", D.generatorSupply],
+    ["circuit_supply", CX, ROW_Y, "", "", D.supply],
   ];
   const values: ValueSpec[] = [
     // Under the title, name above value: the column beside the outdoor unit
     // is too narrow for "Geräuschreduzierung Leicht reduziert".
-    ["primary_supply", COL_X, ODU[1] + 58, "Primärkreis", "sm st"],
-    ["noise_reduction", COL_X, ODU[1] + 92, "Geräuschreduzierung", "sm st"],
-    ["dhw", SX, TANK_VALUE_Y, "Warmwasser", "big"],
-    ["buffer", CX, TANK_VALUE_Y, "Puffer", "big"],
+    ["primary_supply", COL_X, ODU[1] + 58, D.primaryCircuit, "sm st"],
+    ["noise_reduction", COL_X, ODU[1] + 92, D.noiseReduction, "sm st"],
+    ["dhw", SX, TANK_VALUE_Y, D.hotWater, "big"],
+    ["buffer", CX, TANK_VALUE_Y, D.buffer, "big"],
   ];
   return layout({ name: "narrow", w: W, h: H, defs, body, labels, badges, values, vx: VX, vy: VY });
 }

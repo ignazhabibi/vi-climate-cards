@@ -3,7 +3,8 @@
 # Usage: test/screenshot.sh <out.png> <card-width-px> [query] [window-height-px]
 #   query: m=heat|dhw|byp|mixed|idle, dark=1, card=rf (refrigerant card),
 #          se=1 (entity header with status items), st=1 (template header),
-#          info=1 (open the explanation dialog)
+#          info=1 (open the explanation dialog), still=1 (animations off),
+#          focus=<key> (keyboard focus on that part)
 #   window height defaults to width + 120; the narrow layout (below 600 px)
 #   needs about 2 * width + 120.
 # Example: test/screenshot.sh "$PWD/out/card.png" 760 "m=dhw&dark=1"

@@ -31,7 +31,8 @@ const states={
  'sensor.gen':S(36.2,'°C'),'sensor.ipump':S(m==='idle'?0:45,'%'),'sensor.valve':S(valve),'binary_sensor.defrost':S(m==='byp'?'on':'off'),
  'sensor.hk':S(33.9,'°C'),'sensor.noise':S('Leicht reduziert'),'sensor.heat':S(m==='mixed'?'stage_1':'off'),'binary_sensor.hkp':S('on'),'sensor.buf':S(34.1,'°C'),'sensor.dhw':S(51.3,'°C')};
 const fmt=new Intl.NumberFormat('de-DE',{maximumFractionDigits:1});
-const hass={states,themes:{darkMode:dark},formatEntityState:(s)=>{const v=parseFloat(s.state);return isNaN(v)?s.state:fmt.format(v)+(s.attributes.unit_of_measurement?' '+s.attributes.unit_of_measurement:'');}};
+const hass={states,themes:{darkMode:dark},formatEntityState:(s)=>{const v=parseFloat(s.state);return isNaN(v)?s.state:fmt.format(v)+(s.attributes.unit_of_measurement?' '+s.attributes.unit_of_measurement:'');},
+ formatEntityStateToParts:(s)=>{const v=parseFloat(s.state),u=s.attributes.unit_of_measurement;return isNaN(v)?[{type:'value',value:s.state}]:[{type:'value',value:fmt.format(v)}].concat(u?[{type:'literal',value:' '},{type:'unit',value:u}]:[]);}};
 const rf=q.get('card')==='rf';
 const run=m!=='idle';
 Object.assign(states,{
@@ -71,10 +72,14 @@ if(q.get('se')||q.get('sk')){
  if(q.get('sk')) card.setConfig({...card._config,status_entity:'sensor.phase'}); else card.setConfig({...card._config,status_entity:'sensor.phase',status_items:[{entity:'binary_sensor.hkp3',visibility:[{condition:'state',entity:'sensor.phase',state:'off'}]},
   {entity:'sensor.prog',visibility:ww('state_not')},{entity:'select.wwmode',name:'Warmwasser',visibility:ww('state')},'sensor.rod']});
 }
+// still=1: option animations: false.
+if(q.get('still')) card.setConfig({...card._config,animations:false});
 // nx=1: no entity mapping and no integration entities: the card names what it misses.
 if(q.get('nx')) card.setConfig({type:card._config.type});
 document.getElementById('wrap').appendChild(card);
 card.hass=hass;
+// focus=<key>: keyboard focus on the visible part of that key.
+if(q.get('focus')) setTimeout(()=>{const el=[...card.shadowRoot.querySelectorAll(`[data-k="${q.get('focus')}"][role=button]`)].find((e)=>e.getClientRects().length);el?.focus({focusVisible:true});},50);
 // info=1: open the explanation dialog of the refrigerant card.
 if(q.get('info')) setTimeout(()=>card._openInfo(),50);
 </script></body></html>

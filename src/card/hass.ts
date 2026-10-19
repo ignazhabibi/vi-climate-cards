@@ -25,4 +25,8 @@ export interface Hass {
     subscribeMessage<T>(callback: (msg: T) => void, msg: Record<string, unknown>): Promise<() => void>;
   };
   formatEntityState(stateObj: HassEntity, state?: string): string;
+  /** The formatted state in parts: value, literal, unit (HA 2025.x and later). */
+  formatEntityStateToParts?(stateObj: HassEntity, state?: string): { type: string; value: string }[];
+  /** The entity name, e.g. without the device name with `{ type: "entity" }`. */
+  formatEntityName?(stateObj: HassEntity, name: { type: string } | { type: string }[]): string;
 }

@@ -4,6 +4,7 @@
 import { assets } from "../assets";
 import type { Layout } from "../draw/layout";
 import { type CardConfig, checkConfig, conditionEntity, type StateCondition } from "./config";
+import { buildConfigForm } from "./editor";
 import type { Hass, HassEntity } from "./hass";
 import type { InfoContent } from "./info";
 import { isSettled, resolveEntities } from "./resolve";
@@ -55,6 +56,19 @@ export abstract class ViCard extends HTMLElement {
 
   /** Bundle version, e.g. in the browser console: customElements.get("vi-hydraulic-card").version */
   static readonly version = __VERSION__;
+
+  /** The visual editor, built from the card's entity keys. */
+  static getConfigForm() {
+    // `this` is the card class HA calls this on, with its own keys.
+    // biome-ignore lint/complexity/noThisInStatic: ViCard.slots would be empty
+    return buildConfigForm(this.slots, this.presets);
+  }
+
+  /** A new card from the card picker needs no options: it finds the heat
+   * pump and its entities itself. */
+  static getStubConfig(): Partial<CardConfig> {
+    return {};
+  }
 
   protected _config?: CardConfig;
   protected _hass?: Hass;

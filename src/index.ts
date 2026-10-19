@@ -5,7 +5,7 @@ import { ViRefrigerantCard } from "./refrigerant/card";
 
 declare global {
   interface Window {
-    customCards?: { type: string; name: string; description: string }[];
+    customCards?: { type: string; name: string; description: string; preview?: boolean }[];
   }
 }
 
@@ -23,5 +23,6 @@ for (const [type, cls, name, description] of cards) {
   if (customElements.get(type)) continue;
   customElements.define(type, cls);
   window.customCards = window.customCards || [];
-  window.customCards.push({ type, name, description });
+  // The picker shows a live preview: the card finds the heat pump itself.
+  window.customCards.push({ type, name, description, preview: true });
 }

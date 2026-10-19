@@ -41,11 +41,13 @@ describe("discovery through vi_climate_devices", () => {
   it("lets the entities option override and hide parts", () => {
     const config: CardConfig = {
       type: "x",
-      entities: { dhw: "sensor.my_own_dhw", circulation_pump: null },
+      entities: { dhw: "sensor.my_own_dhw", circulation_pump: null, buffer: "" },
     };
     const found = resolveEntities(vitocalHass(), config, HYDRAULIC_SLOTS);
     expect(found.dhw).toBe("sensor.my_own_dhw");
     expect(found).not.toHaveProperty("circulation_pump");
+    // A cleared editor field leaves "": the part is found automatically.
+    expect(found.buffer).toBe("sensor.e3_vitocal_16_pufferspeichertemperatur");
     const slot = HYDRAULIC_SLOTS.find((s) => s.key === "circulation_pump");
     expect(slot && isSettled(slot, found, config)).toBe(true);
   });

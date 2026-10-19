@@ -30,10 +30,14 @@ type: custom:vi-hydraulic-card   # or custom:vi-refrigerant-card
 The card takes the first heat pump of the integration (`device:` picks
 another one by device ID) and finds each part through the Viessmann feature
 the integration names in the entity attribute `viessmann_feature_name`.
-`entities:` overrides single parts; an empty value hides one. Without the
+`entities:` overrides single parts; a key without a value (`null`) hides one. Without the
 integration, all parts can be mapped there by hand. A note on the card names
 required parts it cannot find. `preset:` selects the drawing variant; each
 card has one so far (`vitocal-250a-buffer`, `vitocal-250a`).
+
+Both cards appear in the card picker with a live preview and have a visual
+editor: heat pump device, header state, the explanation button, and under
+"Entitäten anpassen" every part's entity. `status_items` stays YAML.
 
 ## Behaviour
 

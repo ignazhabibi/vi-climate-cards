@@ -90,13 +90,24 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   (`heating.circuits.N.operating.modes.active`), so cards can tell several
   heating circuits apart; today only the unique ID holds the circuit.
 
+## Card editor (2026-10-19)
+
+- `getConfigForm()` builds the visual editor from the slot tables
+  (`src/card/editor.ts`): device (filtered to vi_climate_devices), header
+  state entity, info button, and an expandable "Entitäten anpassen" with one
+  entity field per key (filtered by domain). The preset field appears once a
+  card has more than one variant. `status_items` is not in the form and stays
+  in the YAML.
+- `getStubConfig()` returns `{}`; the picker entry has `preview: true`.
+- `entities` semantics: an entity overrides, `null` (`key:` in YAML) hides a
+  part, an empty string (a cleared editor field) means automatic.
+
 ## Next Steps
 
 1. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
-   - HA card contract: `getConfigForm` built from the slot tables (device,
-     preset, entity overrides), `getStubConfig`, `customCards` with
-     `preview` and `documentationURL`, render only on own entity changes.
+   - HA card contract, rest: `documentationURL` once the repository is
+     public; render only on changes of the card's own entities.
    - Keyboard access and labels for every tappable element, focus ring,
      optional tap/hold actions, an option to stop animations.
    - Device colors derived from the theme; big values through

@@ -27,7 +27,7 @@ export interface CardConfig {
   /** Drawing variant; each card has one so far. */
   preset?: string;
   /** Entity per drawing key, e.g. `valve: sensor.…`. Overrides what the
-   * integration provides; an empty value hides the part. */
+   * integration provides; `null` hides the part. */
   entities?: Record<string, string | null | undefined>;
   /** Template for the header; returns {state, detail, info} or plain text. */
   status?: string;

@@ -1,0 +1,53 @@
+# Card configuration as used in dashboard-heizung, view "uebersicht".
+type: custom:vi-hydraulic-card
+grid_options:
+  columns: full
+# Optional status header, used in view "uebersicht" (the full template lives
+# in the dashboard). The template returns state, detail, and info:
+# status: >-
+#   {{ {'state': 'Bereit', 'detail': 'seit 12 Min.', 'info': 'Puffer 30 °C'} | to_json }}
+# In use: an entity (state, "seit …" from its last change) plus the entities
+# for the line below, each shown only while it says something:
+status_entity: sensor.keller_warmepumpe_warmepumpe_zustand  # Betriebsphase
+status_items:
+  - entity: binary_sensor.e3_vitocal_16_heizkreispumpe_heizkreis_0
+    visibility:  # only while the heat pump is off (heating from the buffer)
+      - condition: state
+        entity: sensor.keller_warmepumpe_warmepumpe_zustand
+        state: "off"
+  - entity: water_heater.e3_vitocal_16_warmwasser  # Warmwassermodus
+    name: Warmwasser
+    visibility:
+      - condition: state
+        entity: binary_sensor.keller_warmepumpe_warmwasserbereitung_aktiv
+        state: "on"
+  - entity: sensor.warmepumpe_circuits_0_operating_programs_active  # Heizprogramm
+    visibility:
+      - condition: state
+        entity: binary_sensor.keller_warmepumpe_warmwasserbereitung_aktiv
+        state_not: "on"
+  - sensor.keller_warmepumpe_heizstab
+entities:
+  # Required
+  valve: sensor.e3_vitocal_16_4_3_wege_ventil_position
+  volumetric_flow: sensor.e3_vitocal_16_volumenstrom
+  # Optional (a badge or value is hidden when its entity is missing)
+  primary_supply: sensor.e3_vitocal_16_vorlauf_primarkreis
+  compressor: binary_sensor.e3_vitocal_16_verdichter_0
+  fan: sensor.e3_vitocal_16_lufter_0_drehzahl
+  fan_2: sensor.e3_vitocal_16_lufter_1_drehzahl
+  secondary_supply: sensor.e3_vitocal_16_vorlauf_sekundarkreis
+  return: sensor.e3_vitocal_16_rucklauftemperatur
+  generator_supply: sensor.e3_vitocal_16_gemeinsamer_vorlauf
+  internal_pump: sensor.e3_vitocal_16_boiler_pumps_internal_current  # pump symbol, filled above 0 %
+  heater: sensor.keller_warmepumpe_heizstab  # coil turns warm while a stage runs
+  noise_reduction: sensor.keller_warmepumpe_noise_reduction_operating_programs_active
+  defrost: binary_sensor.e3_vitocal_16_abtauvorgang
+  circuit_supply: sensor.e3_vitocal_16_vorlauf_heizkreis_0
+  circuit_pump: binary_sensor.e3_vitocal_16_heizkreispumpe_heizkreis_0  # pump symbol, filled while on
+  buffer: sensor.e3_vitocal_16_pufferspeichertemperatur  # big value in the buffer tank, opened by tapping it
+  dhw: sensor.e3_vitocal_16_warmwassertemperatur  # big value in the DHW tank
+  circulation_pump: binary_sensor.e3_vitocal_16_zirkulationspumpe_warmwasser  # pump on the DHW tank outlet
+  # Opened by tapping the drawn devices
+  water_heater: water_heater.e3_vitocal_16_warmwasser  # DHW tank
+  climate: climate.warmepumpe_heizkreis_0  # radiator

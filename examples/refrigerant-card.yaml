@@ -1,0 +1,46 @@
+# Refrigerant circuit card, used in view `anlage` of dashboard-heizung.
+type: custom:vi-refrigerant-card
+grid_options:
+  columns: full
+# Header: the Betriebsphase, below it at most two values.
+status_entity: sensor.keller_warmepumpe_warmepumpe_zustand
+status_items:
+  - entity: sensor.keller_warmepumpe_production_current
+    name: Wärmeleistung  # hidden at 0, so only while running
+  - entity: sensor.verdichter_laufzeit_je_start_heute
+    name: Ø Laufzeit
+  - entity: sensor.keller_warmepumpe_abtauungen_heute
+    name: Abtauungen heute
+    visibility:  # only while the compressor stands
+      - condition: state
+        entity: binary_sensor.e3_vitocal_16_verdichter_0
+        state: "off"
+entities:
+  # Required
+  compressor: binary_sensor.e3_vitocal_16_verdichter_0
+  # Optional (a badge, value, or symbol is hidden when its entity is missing)
+  primary_supply: sensor.e3_vitocal_16_vorlauf_primarkreis
+  fan_1: sensor.e3_vitocal_16_lufter_0_drehzahl
+  fan_2: sensor.e3_vitocal_16_lufter_1_drehzahl
+  evaporator_liquid: sensor.e3_vitocal_16_verdampfer_0_flussigkeitstemperatur
+  superheat: sensor.e3_vitocal_16_verdampfer_0_uberhitzung
+  base_heater: binary_sensor.e3_vitocal_16_verdampfer_0_basisheizung
+  suction_temp: sensor.e3_vitocal_16_verdichter_0_einlasstemperatur
+  suction_pressure: sensor.e3_vitocal_16_verdichter_0_einlassdruck
+  compressor_speed: sensor.e3_vitocal_16_verdichter_0_drehzahl  # big value, opened by tapping the compressor
+  hot_gas: sensor.e3_vitocal_16_verdichter_0_auslasstemperatur
+  oil_temp: sensor.e3_vitocal_16_verdichter_0_oltemperatur
+  motor_temp: sensor.e3_vitocal_16_verdichter_0_motortemperatur
+  crankcase_heater: binary_sensor.e3_vitocal_16_verdichter_0_kurbelgehauseheizung
+  condenser_liquid: sensor.e3_vitocal_16_verflussiger_0_flussigkeitstemperatur
+  economizer_liquid: sensor.e3_vitocal_16_economizer_0_flussigkeitstemperatur
+  secondary_supply: sensor.e3_vitocal_16_vorlauf_sekundarkreis
+  return: sensor.e3_vitocal_16_rucklauftemperatur
+  volumetric_flow: sensor.e3_vitocal_16_volumenstrom
+  defrost: binary_sensor.e3_vitocal_16_abtauvorgang
+  outside_temp: sensor.e3_vitocal_16_aussentemperatur
+  # Expansion valve openings: valve 1 between condenser and economizer,
+  # valve 2 between economizer and evaporator (mapping as in vieventlog).
+  valve_1: sensor.e3_vitocal_16_sensors_valve_0_expansion_target
+  valve_2: sensor.e3_vitocal_16_sensors_valve_1_expansion_target
+  inverter_power: sensor.e3_vitocal_16_aktueller_stromverbrauch_0  # big value in the inverter

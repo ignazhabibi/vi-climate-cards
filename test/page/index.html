@@ -1,0 +1,78 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+<style>
+body{margin:0;padding:16px;font-family:Roboto,sans-serif;background:#fafafa;
+ --primary-text-color:#212121;--secondary-text-color:#727272;--divider-color:#e0e0e0;--card-background-color:#fff;--state-icon-color:#44739e;--disabled-text-color:#bdbdbd}
+body.dark{background:#111;--primary-text-color:#e1e1e1;--secondary-text-color:#9b9b9b;--divider-color:rgba(225,225,225,.12);--card-background-color:#1c1c1c;--state-icon-color:#44739e}
+ha-card{display:block;background:var(--card-background-color);border:1px solid var(--divider-color);border-radius:12px}
+#wrap{width:760px}
+</style></head><body>
+<div id="wrap"></div>
+<script>
+customElements.define('ha-card', class extends HTMLElement {});
+customElements.define('ha-icon', class extends HTMLElement {
+  connectedCallback(){ if(this.shadowRoot) return; const r=this.attachShadow({mode:'open'});
+    r.innerHTML='<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css"><i class="mdi '+this.getAttribute('icon').replace(':','-')+'" style="font-size:var(--mdc-icon-size,24px);line-height:1;display:block"></i>'; }
+});
+</script>
+<script src="../../dist/vi-climate-cards.js"></script>
+<script>
+const q=new URLSearchParams(location.search);
+if(q.get('w')) document.getElementById('wrap').style.width=q.get('w')+'px';
+const dark=!!q.get('dark'); if(dark) document.body.classList.add('dark');
+const m=q.get('m')||'heat';
+const valve={heat:'climate_circuit_one',dhw:'domestic_hot_water',byp:'climat_circuit_two_defrost',mixed:'climat_circuit_one_and_two',idle:'climat_circuit_two_defrost'}[m];
+const since=new Date(Date.now()-95*60000).toISOString();
+const S=(state,unit)=>({state:String(state),last_changed:since,attributes:{unit_of_measurement:unit}});
+const flow=m==='idle'?0:1330;
+const states={
+ 'sensor.pri':S(12.9,'°C'),'sensor.comp':S(m==='idle'?0:19.8,'rps'),'binary_sensor.comp':S(m==='idle'?'off':'on'),
+ 'sensor.fan':S(m==='idle'||m==='byp'?0:55,'%'),'sensor.sec':S(36.5,'°C'),'sensor.flow':S(flow,'L/h'),'sensor.ret':S(33.6,'°C'),
+ 'sensor.gen':S(36.2,'°C'),'sensor.ipump':S(m==='idle'?0:45,'%'),'sensor.valve':S(valve),'binary_sensor.defrost':S(m==='byp'?'on':'off'),
+ 'sensor.hk':S(33.9,'°C'),'sensor.noise':S('Leicht reduziert'),'sensor.heat':S(m==='mixed'?'stage_1':'off'),'binary_sensor.hkp':S('on'),'sensor.buf':S(34.1,'°C'),'sensor.dhw':S(51.3,'°C')};
+const fmt=new Intl.NumberFormat('de-DE',{maximumFractionDigits:1});
+const hass={states,themes:{darkMode:dark},formatEntityState:(s)=>{const v=parseFloat(s.state);return isNaN(v)?s.state:fmt.format(v)+(s.attributes.unit_of_measurement?' '+s.attributes.unit_of_measurement:'');}};
+const rf=q.get('card')==='rf';
+const run=m!=='idle';
+Object.assign(states,{
+ 'sensor.lf1':S(run&&m!=='byp'?42:0,'%'),'sensor.lf2':S(run&&m!=='byp'?47:0,'%'),
+ 'sensor.evl':S(3.2,'°C'),'sensor.sh':S(2.2,'K'),'sensor.suct':S(18.9,'°C'),'sensor.sucp':S(4.89,'bar'),
+ 'sensor.hot':S(56.5,'°C'),'sensor.oil':S(53,'°C'),'sensor.mot':S(21.8,'°C'),
+ 'sensor.cond':S(30.9,'°C'),'sensor.eco':S(21,'°C'),'sensor.out':S(9.2,'°C'),'sensor.v1':S(run?99:0,'%'),'sensor.v2':S(run?14:0,'%'),'sensor.invp':S(run?1240:0,'W'),'sensor.invc':S(run?5.6:0,'A'),'sensor.invt':S(38,'°C'),
+ 'binary_sensor.circ':S('on'),'binary_sensor.crank':S(m==='idle'?'on':'off'),'binary_sensor.base':S(m==='byp'?'on':'off')});
+const card=document.createElement(rf?'vi-refrigerant-card':'vi-hydraulic-card');
+if(rf) card.setConfig({entities:{primary_supply:'sensor.pri',fan_1:'sensor.lf1',fan_2:'sensor.lf2',
+ evaporator_liquid:'sensor.evl',superheat:'sensor.sh',suction_temp:'sensor.suct',suction_pressure:'sensor.sucp',
+ hot_gas:'sensor.hot',compressor_speed:'sensor.comp',compressor:'binary_sensor.comp',oil_temp:'sensor.oil',motor_temp:'sensor.mot',
+ crankcase_heater:'binary_sensor.crank',base_heater:'binary_sensor.base',condenser_liquid:'sensor.cond',economizer_liquid:'sensor.eco',
+ secondary_supply:'sensor.sec',return:'sensor.ret',volumetric_flow:'sensor.flow',defrost:'binary_sensor.defrost',outside_temp:'sensor.out',valve_1:'sensor.v1',valve_2:'sensor.v2',inverter_power:'sensor.invp',inverter_current:'sensor.invc',inverter_temp:'sensor.invt',internal_pump:'sensor.ipump'}});
+else card.setConfig({entities:{primary_supply:'sensor.pri',compressor_speed:'sensor.comp',compressor:'binary_sensor.comp',fan:'sensor.lf1',fan_2:'sensor.lf2',secondary_supply:'sensor.sec',volumetric_flow:'sensor.flow',return:'sensor.ret',generator_supply:'sensor.gen',internal_pump:'sensor.ipump',valve:'sensor.valve',defrost:'binary_sensor.defrost',circuit_supply:'sensor.hk',circuit_pump:'binary_sensor.hkp',buffer:'sensor.buf',dhw:'sensor.dhw',outside_temp:'sensor.out',circulation_pump:'binary_sensor.circ',water_heater:'sensor.dhw',climate:'sensor.hk',noise_reduction:'sensor.noise',heater:'sensor.heat'}});
+// st=1: status header with a stubbed render_template subscription.
+if(q.get('st')){
+ const st={heat:['Heizen','aktiv','Seit 1 Std. · 4,8 kW · heute COP 4,7'],dhw:['Warmwasser','aktiv','Seit 12 Min. · 6,1 kW · heute COP 4,7'],
+  byp:['Abtauen','aktiv','Seit 3 Min. · heute COP 4,7'],mixed:['Heizen','aktiv','Seit 1 Std. · 4,8 kW · heute COP 4,7 · Wohnzimmer zu kühl'],
+  idle:['Bereit','keine Anforderung','Seit 12 Min. · heute COP 4,7']}[m];
+ hass.connection={subscribeMessage:(cb)=>{setTimeout(()=>cb({result:{state:st[0],detail:st[1],info:st[2]}}));return Promise.resolve(()=>{});}};
+ card.setConfig({...card._config,status:'{{ stub }}'});
+}
+// se=1: status header from an activity entity (state, last change) and
+// status_items with visibility conditions: heating program or DHW mode.
+if(q.get('se')||q.get('sk')){
+ const T=(id,state,name)=>{states[id]={entity_id:id,state:String(state),last_changed:new Date(Date.now()-12*60000).toISOString(),attributes:{friendly_name:'Wärmepumpe '+name}};hass.entities[id]={device_id:'d1'};};
+ hass.entities={};hass.devices={d1:{name:'Wärmepumpe'}};
+ hass.formatEntityState=((f)=>(s)=>(s.entity_id==='binary_sensor.hkp3'?{on:'In Betrieb'}:{heating:'Heizen',defrosting:'Abtauen'})[s.state]??({stage_1:'Stufe 1',stage_2:'Stufe 2',off:'Aus',on:'An',normal_heating:'Normal',reduced_heating:'Reduziert',efficient:'Eco'})[s.state]??f(s))(hass.formatEntityState);
+ T('sensor.betrieb',{heat:'Heizen',dhw:'Warmwasser',mixed:'Heizen',byp:'Abtauen',idle:'Aus'}[m],'Betrieb');
+ T('binary_sensor.hkp3','on','Heizkreispumpe');T('sensor.phase',{heat:'heating',dhw:'heating',mixed:'heating',byp:'defrosting',idle:'off'}[m],'Betriebsphase');
+ T('binary_sensor.ww',m==='dhw'?'on':'off','Warmwasserbereitung aktiv');
+ T('sensor.prog',m==='mixed'?'reduced_heating':'normal_heating','Heizprogramm');
+ T('select.wwmode','efficient','Warmwassermodus');
+ T('sensor.rod',{dhw:'stage_2',mixed:'stage_1'}[m]||'off','Heizstab');
+ const ww=(k)=>[{condition:'state',entity:'binary_sensor.ww',[k]:'on'}];
+ if(q.get('sk')) card.setConfig({...card._config,status_entity:'sensor.phase'}); else card.setConfig({...card._config,status_entity:'sensor.phase',status_items:[{entity:'binary_sensor.hkp3',visibility:[{condition:'state',entity:'sensor.phase',state:'off'}]},
+  {entity:'sensor.prog',visibility:ww('state_not')},{entity:'select.wwmode',name:'Warmwasser',visibility:ww('state')},'sensor.rod']});
+}
+document.getElementById('wrap').appendChild(card);
+card.hass=hass;
+// info=1: open the explanation dialog of the refrigerant card.
+if(q.get('info')) setTimeout(()=>card._openInfo(),50);
+</script></body></html>

@@ -21,12 +21,14 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+1fdb53d` (48,978 bytes, djb2 4199979991, checked in the
-  browser against the local file). `dashboard-heizung` uses the new card
+  build `0.1.0+139732b` (48,621 bytes, djb2 2344975736, checked in the
+  browser against the local file), which includes the cleanup below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
   `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
-  views were checked live (rendering, no error cards, no console errors,
-  a badge tap opens its more-info dialog).
+  views were checked live while the heat pump was heating (rendering, no
+  error cards, no console errors, the refrigerant explanation shows its live
+  lines; with the first deploy also a badge tap opened its more-info
+  dialog).
 - The dashboard changed since `docs/history.md`: it now has only the views
   `uebersicht` and `diagnose`; the former view `anlage` is gone and the
   refrigerant card sits in `diagnose` next to Kennwerte, Verdichter, and
@@ -36,7 +38,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   names), and domain notes are in `docs/history.md`; they still apply apart
   from the view layout above.
 
-## Done in the cleanup (2026-10-19, not deployed yet)
+## Done in the cleanup (2026-10-19, deployed)
 
 - Aliases for the former card names removed (no dashboard used them).
 - Unused round status dots (`dots`, `.dot`) removed; the snapshot diff showed
@@ -56,8 +58,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 
 ## Next Steps
 
-1. Deploy the cleanup (after the user's go-ahead) and check both views live.
-2. Plan agreed with the user (own instance, built publish-ready):
+1. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
    - Entities found through the device and `translation_key`, `entities` only
      for overrides; list what the integration has to provide.

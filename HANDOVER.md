@@ -21,9 +21,9 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
 - Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
-  build `0.1.0+9b9aff8` (55,929 bytes, djb2 3172131696, checked in the
+  build `0.1.0+7603810` (62,676 bytes, djb2 4023146547, checked in the
   browser against the local file), which includes the cleanup, the entity
-  discovery, and the card editor below. `dashboard-heizung` uses the new card
+  discovery, the card editor, and the plan items below. `dashboard-heizung` uses the new card
   types: `vi-hydraulic-card` in view `uebersicht` (`views[0].sections[1]`),
   `vi-refrigerant-card` in view `diagnose` (`views[1].sections[0]`). Both
   views were checked live while the heat pump was heating (rendering, no
@@ -113,7 +113,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   "Gerät auswählen" (the label "Wärmepumpe" is set and used as `aria-label`;
   entity pickers do show theirs). The helper text below explains the field.
 
-## Plan items done (2026-10-19, not deployed yet)
+## Plan items done (2026-10-19, deployed)
 
 - Texts: every card and editor text is in `src/i18n/de.ts` (`T`, `fill()`);
   the drawing snapshots stayed byte-identical through the move.
@@ -141,9 +141,14 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   `animations: false`, no redraw on an unrelated entity. Bundle 62.7 KB
   (was 55.9 KB): the dictionary structure and the new behaviour.
 - Not done: `documentationURL` needs a public repository.
+- Checked live after the deploy (nothing saved, dashboard config hash
+  unchanged): both cards find all parts (20 and 23) and show no note or
+  console error; labels such as "Puffer: 28,0 °C" and "Verdichter Drehzahl:
+  38,6 rps"; Tab moves between badges with a visible ring, Enter opened the
+  right more-info dialog, a focused pump glows; the refrigerant editor shows
+  "Bewegung zeigen" and "Interaktionen" (tap: more-info, hold: none), and
+  switching motion off stopped the preview.
 
 ## Next Steps
 
-1. Commit, deploy, and check live: both views, the editor's new fields
-   ("Bewegung zeigen", "Interaktionen"), keyboard focus on the dashboard.
-2. `documentationURL` once the repository is public.
+1. `documentationURL` once the repository is public.

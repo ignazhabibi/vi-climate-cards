@@ -1,8 +1,10 @@
 # Card configuration as used in dashboard-heizung, view "uebersicht".
 # With vi_climate_devices (v3.1.0 or later) the card finds its entities on
-# the heat pump device by itself; `entities` below is optional and only
-# overrides single keys (an empty value hides a part). The dashboard still
-# lists the full mapping; discovery finds exactly the same entities.
+# the heat pump device by itself; `entities` is optional and only overrides
+# single keys (an empty value hides a part). The dashboard no longer lists
+# `entities` (removed 2026-10-19). The mapping below is what discovery finds
+# on the user's device: a reference for mapping by hand, and the expected
+# result in test/discovery.test.ts.
 type: custom:vi-hydraulic-card
 grid_options:
   columns: full

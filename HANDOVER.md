@@ -72,8 +72,13 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
   the mapping of `examples/*.yaml` from that data.
 - Checked live after the deploy: a card without `entities`, given the real
   `hass` object, found all 20 hydraulic and all 23 refrigerant parts, with no
-  difference to the hand-made mapping of the dashboards. The refrigerant
-  card's dashboard config still lists `outside_temp`, which no card draws.
+  difference to the hand-made mapping of the dashboards.
+- The `entities` blocks are removed from both cards in `dashboard-heizung`
+  (2026-10-19, with the user's go-ahead); each card now holds only its type,
+  `grid_options`, and the header options. Checked live: both cards found all
+  parts themselves (20 and 23), no note, no console errors, and a tap opened
+  the discovered entity. To go back, the former mapping is in
+  `examples/*.yaml`.
 - At startup the integration's entities can be unavailable and carry no
   attribute yet; the card keeps searching while keys are open and keeps what
   it found (`_resolve()` in `base-card.ts`).
@@ -87,10 +92,7 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 
 ## Next Steps
 
-1. If the user wants: drop the `entities` blocks from both cards in
-   `dashboard-heizung` (discovery finds the same entities; `outside_temp` is
-   unused anyway).
-2. Plan agreed with the user (own instance, built publish-ready):
+1. Plan agreed with the user (own instance, built publish-ready):
    - Texts into a dictionary (German only for now).
    - HA card contract: `getConfigForm` built from the slot tables (device,
      preset, entity overrides), `getStubConfig`, `customCards` with

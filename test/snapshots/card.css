@@ -32,6 +32,9 @@ ha-card{overflow:hidden}
 svg{display:block;width:100%;height:auto}
 .sky0{stop-color:var(--sky);stop-opacity:0}.sky1{stop-color:var(--sky);stop-opacity:var(--sky-a)}
 .lawn{fill:var(--lawn);fill-opacity:var(--lawn-a)}.ground{fill:var(--ground)}.wall{fill:var(--wall)}
+/* Inside the refrigerant card's open housing the scene is the card itself,
+   so the components stand out as devices, as on the hydraulic schematic. */
+.cab{fill:var(--card-background-color,#fff)}
 .dev{fill:var(--dev)}.devd{fill:var(--devd)}.devl{fill:none;stroke:var(--devl);stroke-width:1}
 .shade{fill:var(--shade)}.side{fill:rgba(0,0,0,.18)}.plinth{opacity:.85}
 .disp{fill:rgba(255,255,255,.14)}
@@ -100,6 +103,11 @@ svg{display:block;width:100%;height:auto}
 .lb.dv{font-size:min(calc(11 * var(--u)),calc(11 * var(--g)));line-height:calc(15 * var(--u));padding:0 calc(3 * var(--u));border-radius:calc(3 * var(--u));
   background:var(--dev);color:var(--secondary-text-color)}
 .lb.v{transform:translate(-50%,-50%) rotate(-90deg)}
+/* The refrigerant card's devices are large enough for their names at the
+   size of the value names (Inverter, Verdichter); the --g cap above is for
+   the small boxes of the hydraulic schematic. */
+.lay:is(.rf,.rfn) .lb.dl,.lay:is(.rf,.rfn) .lb.dv{font-size:calc(11 * var(--u))}
+.lay:is(.rf,.rfn) .lb.dv{line-height:calc(15 * var(--u))}
 .o{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:auto}
 .bd::after{content:"";position:absolute;inset:calc(-6 * var(--u)) 0}
 /* Small values are tap targets of at least 24px height (WCAG 2.5.8). */
@@ -126,15 +134,15 @@ svg{display:block;width:100%;height:auto}
 .ibtn{position:absolute;top:var(--ha-space-2,8px);right:var(--ha-space-1,4px);z-index:1;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
   border-radius:var(--ha-border-radius-circle,50%);cursor:pointer;color:var(--secondary-text-color);--mdc-icon-size:24px}
 .ibtn:focus{outline:none}
-.ibtn:hover{background:rgba(127,127,127,.12);color:var(--primary-text-color)}
+.ibtn:hover{background:var(--ha-color-fill-neutral-quiet-hover,rgba(127,127,127,.12));color:var(--primary-text-color)}
 /* Header buttons from the right: info, then pause. */
 .lay.btns2 .ipause{right:52px}
 .lay.btns1 .hd{padding-right:56px;min-height:32px}.lay.btns2 .hd{padding-right:104px;min-height:32px}
 @media (prefers-reduced-motion:reduce){.ipause{display:none}.lay.btns2 .hd{padding-right:56px}}
 .wrap.still .ipause{color:var(--primary-text-color)}
 /* Note when required entities are missing (see _missingNote). */
-.miss{margin:var(--ha-space-4,16px) var(--ha-space-4,16px) 0;padding:var(--ha-space-2,8px) var(--ha-space-3,12px);border-radius:var(--ha-border-radius-md,8px);border-inline-start:4px solid var(--warning-color,#ffa600);
-  background:rgba(255,166,0,.12);color:var(--primary-text-color);
+.miss{margin:var(--ha-space-4,16px) var(--ha-space-4,16px) 0;padding:var(--ha-space-2,8px) var(--ha-space-3,12px);border-radius:var(--ha-border-radius-md,8px);border-inline-start:4px solid var(--ha-color-border-warning-normal,var(--warning-color,#ffa600));
+  background:var(--ha-color-fill-warning-quiet-resting,rgba(255,166,0,.12));color:var(--primary-text-color);
   font-family:var(--ha-font-family-body,Roboto,Noto,sans-serif);font-size:var(--ha-font-size-m,14px);line-height:20px}
 dialog.inf{border:none;padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 64px);box-sizing:border-box;
   border-radius:var(--ha-dialog-border-radius,24px);background:var(--ha-card-background,var(--card-background-color,#fff));
@@ -149,17 +157,17 @@ dialog.inf::backdrop{background:rgba(0,0,0,.32)}
 .inf .ibd{overflow:auto;padding:var(--ha-space-1,4px) var(--ha-space-6,24px) var(--ha-space-6,24px);outline:none}
 .inf p{margin:0;font-size:var(--ha-font-size-m,14px);line-height:20px;color:var(--secondary-text-color)}
 .inf .ist{margin:var(--ha-space-4,16px) 0 var(--ha-space-2,8px);padding:var(--ha-space-2,8px) var(--ha-space-3,12px);border-radius:var(--ha-border-radius-lg,12px);font-size:var(--ha-font-size-m,14px);line-height:20px;
-  background:rgba(127,127,127,.10);color:var(--primary-text-color)}
+  background:var(--ha-color-fill-neutral-quiet-resting,rgba(127,127,127,.10));color:var(--primary-text-color)}
 .inf .step{display:grid;grid-template-columns:56px 1fr;column-gap:var(--ha-space-4,16px);padding:var(--ha-space-3,12px) 0;border-top:1px solid var(--divider-color,#e0e0e0)}
 .inf .step:first-of-type{border-top:none}
 .inf .step svg{width:56px;height:56px;display:block}
 .inf h3,.inf h4{margin:0 0 2px;font-size:var(--ha-font-size-l,16px);line-height:24px;font-weight:var(--ha-font-weight-medium,500)}
-.inf .now{margin-top:6px;font-size:var(--ha-font-size-m,14px);line-height:20px;font-weight:var(--ha-font-weight-medium,500);color:var(--primary-text-color)}
+.inf .now{margin-top:var(--ha-space-2,8px);font-size:var(--ha-font-size-m,14px);line-height:20px;font-weight:var(--ha-font-weight-medium,500);color:var(--primary-text-color)}
 .inf .now:empty{display:none}
 .inf .tips{margin-top:var(--ha-space-2,8px);padding-top:var(--ha-space-3,12px);border-top:1px solid var(--divider-color,#e0e0e0)}
 .inf .tips div+div{margin-top:var(--ha-space-3,12px)}
 .inf .leg{padding:var(--ha-space-3,12px) 0;border-top:1px solid var(--divider-color,#e0e0e0)}
-.inf .leg>div{display:flex;flex-wrap:wrap;gap:6px 20px}
+.inf .leg>div{display:flex;flex-wrap:wrap;gap:var(--ha-space-2,8px) var(--ha-space-5,20px)}
 .inf .leg span{display:inline-flex;align-items:center;gap:var(--ha-space-2,8px);font-size:var(--ha-font-size-m,14px);line-height:20px;color:var(--secondary-text-color)}
 .inf .leg svg{width:56px;height:8px;overflow:visible}
 .inf .leg .pipe{stroke-width:4}.inf .leg .pipe:not(.on){stroke:var(--secondary-text-color);stroke-opacity:.6}

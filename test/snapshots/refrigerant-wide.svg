@@ -36,7 +36,7 @@
 </g>
 <rect class='devd plinth' x='160' y='684' width='648' height='18' rx='2'/>
 <rect class='devd' x='150' y='52' width='668' height='636' rx='14'/>
-<rect class='dev' x='158' y='60' width='652' height='620' rx='8'/>
+<rect class='cab' x='158' y='60' width='652' height='620' rx='8'/>
 <rect class='dev' x='180' y='220' width='100' height='370' rx='6'/>
 <rect x='184' y='226' width='92' height='358' fill='url(#vi-rf-fin)'/>
 <rect class='devl' x='180' y='220' width='100' height='370' rx='6'/>

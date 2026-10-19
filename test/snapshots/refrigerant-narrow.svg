@@ -26,7 +26,7 @@
 <rect x='16' y='688' width='368' height='4' fill='url(#vi-rfn-tuft)'/>
 <rect class='devd plinth' x='26' y='674' width='348' height='18' rx='2'/>
 <rect class='devd' x='16' y='52' width='368' height='626' rx='14'/>
-<rect class='dev' x='24' y='60' width='352' height='610' rx='8'/>
+<rect class='cab' x='24' y='60' width='352' height='610' rx='8'/>
 <g class='fanbox tap' data-k='fan_1'>
 <rect class='devd' x='135' y='70' width='60' height='60' rx='8'/>
 <circle class='guard' cx='165' cy='100' r='24' stroke-width='1.5'/>

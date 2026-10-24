@@ -86,7 +86,8 @@ Configuration examples with the full entity mapping and the header in use:
 
 Build the bundle (see below) and add `dist/vi-climate-cards.js` as a dashboard
 resource of type `module`, for example by copying it to `/config/www/` and
-registering `/local/vi-climate-cards.js?v=<version>`.
+registering `/local/vi-climate-cards.js?v=<version>`. The author does exactly
+this over SSH (`scp` into the Home Assistant config's `www/` directory).
 
 ## Development
 

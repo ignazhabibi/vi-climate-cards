@@ -20,7 +20,13 @@ State as of 2026-10-19. Read `AGENTS.md` first for the working rules.
 - Tests now: `test/drawing.test.ts` keeps everything the cards draw as files
   in `test/snapshots/` (taken from the verified port); `test/config.test.ts`
   and `test/card.test.ts` cover the configuration check and the minute timer.
-- Deployed 2026-10-19: resource `a94feedfed44424592ffb50bf9328be2` holds
+- Deploy path changed 2026-10-24: the bundle (build `0.1.0+5dc3255`, 67,577
+  bytes) is copied by SSH to `/srv/smarthome/homeassistant/config/www/vi-climate-cards.js`
+  and the resource now points to `/local/vi-climate-cards.js?v=0.1.0-5dc3255`
+  instead of holding inline code. Checked live: `diagnose` loads the file by
+  URL and both card types are defined. Use SSH for all future deploys (see
+  `AGENTS.md`, Deployment).
+- Deployed 2026-10-19 (inline, superseded by the above): resource `a94feedfed44424592ffb50bf9328be2` holds
   build `0.1.0+27ccf4b` (67,577 bytes, djb2 2768155876, checked in the
   browser against the local file), which includes the cleanup, the entity
   discovery, the card editor, the plan items, and the review follow-up below. `dashboard-heizung` uses the new card

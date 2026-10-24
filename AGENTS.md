@@ -141,14 +141,30 @@ never enter credentials yourself.
 
 ## Deployment
 
-- The cards are an inline dashboard resource (type `module`) with resource id
-  `a94feedfed44424592ffb50bf9328be2`. Update that resource with the full
-  content of `dist/vi-climate-cards.js` (`ha_config_set_dashboard_resource`
-  with `resource_id`). Never create a second resource for the cards.
-- Confirm that the size reported by the update equals the byte size of the
-  local `dist/` file, then reload the dashboard. The first line of the file
-  names the version (`/* vi-climate-cards 0.1.0+<git rev> */`); deploy only
-  committed builds (no `.dirty`).
+- Deploy over SSH (since 2026-10-24; replaces the former inline resource).
+  The homelab (`192.168.9.29`, host `homelab`, user `michael`) accepts key
+  login. Home Assistant runs in Docker; its config directory is
+  `/srv/smarthome/homeassistant/config` on the host (`/config` in the
+  container). Copy the build:
+  `scp dist/vi-climate-cards.js 192.168.9.29:/srv/smarthome/homeassistant/config/www/vi-climate-cards.js`
+  It is served as `/local/vi-climate-cards.js`.
+- The sandbox blocks the local network (`Operation not permitted`), so
+  `ssh` and `scp` need `dangerouslyDisableSandbox: true`, which asks the user
+  each time. That is not an SSH problem. Reading and listing on the homelab is
+  fine; write, delete, or change only what the task needs. Never change
+  `.storage/` or `configuration.yaml` without asking (HA overwrites `.storage`
+  while running). `www/pycupra/` belongs to `root`.
+- The dashboard resource (type `module`, id `a94feedfed44424592ffb50bf9328be2`)
+  now points to `/local/vi-climate-cards.js?v=<version>` (version from the
+  first line, `+` written as `-`). After each deploy, update that resource
+  URL with the new `?v=` (`ha_config_set_dashboard_resource` with
+  `resource_id` and `url`) so browsers drop the cache. Never create a second
+  resource for the cards.
+- Confirm that the size on the homelab (`ssh … wc -c`) and in
+  `curl http://192.168.9.29:8123/local/vi-climate-cards.js` equals the byte
+  size of the local `dist/` file, then reload the dashboard. The first line
+  of the file names the version (`/* vi-climate-cards 0.1.0+<git rev> */`);
+  deploy only committed builds (no `.dirty`).
 - The bundle registers the former names `vi-anlagenschema-card` and
   `vi-kaeltekreis-card` as aliases, so dashboards keep working while their
   card types are switched to the new names.

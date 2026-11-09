@@ -1,5 +1,23 @@
 # vi-climate-cards
 
+> [!WARNING]
+> **Proof of concept (PoC).** This project is an early experiment, not a
+> finished product. Right now it supports **only the Viessmann Vitocal 250-A
+> with exactly this hydraulic layout** (heat pump with indoor unit, heating
+> rod, 4/3-way valve and defrost buffer, buffer tank with one heating circuit,
+> and DHW tank) **and only through the
+> [vi_climate_devices](https://github.com/ignazhabibi/vi_climate_devices)
+> integration**. Other Viessmann models, other hydraulic layouts, and other
+> integrations are not supported and are not tested; the cards may show wrong
+> values, missing parts, or nothing at all there. The refrigerant card shows
+> the outdoor unit, which is the same in every Vitocal 250-A, so it is the
+> most likely to work elsewhere, but this is also unverified. Expect breaking
+> changes without notice. Card text is German only.
+>
+> **Hinweis (Deutsch):** Dies ist ein Proof of Concept. Unterstützt wird
+> aktuell nur die Viessmann Vitocal 250-A mit genau diesem Anlagenschema und
+> nur über die Integration vi_climate_devices. Alles andere ist ungetestet.
+
 Home Assistant dashboard cards for Viessmann heat pumps, starting with the
 Vitocal 250-A. They complete the Viessmann package of
 [vi_api_client](https://github.com/ignazhabibi/vi_api_client) and the
@@ -84,10 +102,25 @@ Configuration examples with the full entity mapping and the header in use:
 
 ## Installation
 
-Build the bundle (see below) and add `dist/vi-climate-cards.js` as a dashboard
-resource of type `module`, for example by copying it to `/config/www/` and
-registering `/local/vi-climate-cards.js?v=<version>`. The author does exactly
-this over SSH (`scp` into the Home Assistant config's `www/` directory).
+### HACS (custom repository)
+
+The project is not in the default HACS list. Add it by hand:
+
+1. In HACS, open the three-dot menu, then **Custom repositories**.
+2. Enter `https://github.com/ignazhabibi/vi-climate-cards` and choose the
+   category **Dashboard**.
+3. Install **Viessmann Climate Cards** and reload the browser. HACS registers
+   the dashboard resource itself.
+
+Then add `type: custom:vi-hydraulic-card` or `type: custom:vi-refrigerant-card`
+to a dashboard (see Configuration).
+
+### Manual
+
+Download `vi-climate-cards.js` from the latest
+[release](https://github.com/ignazhabibi/vi-climate-cards/releases), copy it
+to `/config/www/`, and add `/local/vi-climate-cards.js` as a dashboard
+resource of type `module`. Or build it yourself (see below).
 
 ## Development
 

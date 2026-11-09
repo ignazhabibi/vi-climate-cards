@@ -2,8 +2,8 @@
 
 ## Scope and Priorities
 
-Follow runtime instructions first, then this file. Read `HANDOVER.md` at the
-start of a session for the current state and open tasks.
+Follow runtime instructions first, then this file. Design history and domain
+notes are in `docs/history.md`.
 
 Keep changes small and directly related to the request. Do not start tasks the
 user has not asked for, and do not refactor unrelated code. State assumptions
@@ -20,10 +20,13 @@ lives only in `src/i18n/de.ts`; code takes it from there (`T`, `fill()`).
   Viessmann Vitocal 250-A with live values: `vi-hydraulic-card` (hydraulic
   schematic) and `vi-refrigerant-card` (refrigerant circuit). Both are in one
   bundle and share one base class.
-- Target (agreed 2026-10-19): the user's own instance first, but built so it
-  can be published later (HACS) without a rewrite. If it is published, the
-  refrigerant card goes first: its hardware is the same in every 250-A, while
-  the hydraulics differ per house.
+- Target (agreed 2026-10-19): the user's own instance first, built so it can
+  be published without a rewrite. Published 2026-11-09 as a HACS custom
+  repository (`ignazhabibi/vi-climate-cards`, category Dashboard), labelled
+  as a proof of concept: only the Vitocal 250-A with this hydraulic layout
+  through vi_climate_devices is supported (see the README warning; keep it
+  true). The refrigerant card is the more portable one: its hardware is the
+  same in every 250-A, while the hydraulics differ per house.
 - The cards complete the user's Viessmann package (`vi_api_client`,
   `vi_climate_devices`, both developed by the user). Name, focus, and
   drawings stay Viessmann. Other manufacturers may work through manual
@@ -134,40 +137,34 @@ lives only in `src/i18n/de.ts`; code takes it from there (`T`, `fill()`).
 The test page cannot load the MDI font inside the stubbed `ha-icon`, so icons
 show as squares there. That is expected.
 
-After deploying, check the live view in the browser pane at
+After a release is installed, check the live view in the browser pane at
 `http://192.168.9.29:8123/dashboard-heizung/diagnose` (refrigerant card) and
 `/dashboard-heizung/uebersicht` (hydraulic card). The user logs in there;
 never enter credentials yourself.
 
 ## Deployment
 
-- Deploy over SSH (since 2026-10-24; replaces the former inline resource).
-  The homelab (`192.168.9.29`, host `homelab`, user `michael`) accepts key
-  login. Home Assistant runs in Docker; its config directory is
-  `/srv/smarthome/homeassistant/config` on the host (`/config` in the
-  container). Copy the build:
-  `scp dist/vi-climate-cards.js 192.168.9.29:/srv/smarthome/homeassistant/config/www/vi-climate-cards.js`
-  It is served as `/local/vi-climate-cards.js`.
-- The sandbox blocks the local network (`Operation not permitted`), so
-  `ssh` and `scp` need `dangerouslyDisableSandbox: true`, which asks the user
-  each time. That is not an SSH problem. Reading and listing on the homelab is
-  fine; write, delete, or change only what the task needs. Never change
-  `.storage/` or `configuration.yaml` without asking (HA overwrites `.storage`
-  while running). `www/pycupra/` belongs to `root`.
-- The dashboard resource (type `module`, id `a94feedfed44424592ffb50bf9328be2`)
-  now points to `/local/vi-climate-cards.js?v=<version>` (version from the
-  first line, `+` written as `-`). After each deploy, update that resource
-  URL with the new `?v=` (`ha_config_set_dashboard_resource` with
-  `resource_id` and `url`) so browsers drop the cache. Never create a second
-  resource for the cards.
-- Confirm that the size on the homelab (`ssh … wc -c`) and in
-  `curl http://192.168.9.29:8123/local/vi-climate-cards.js` equals the byte
-  size of the local `dist/` file, then reload the dashboard. The first line
-  of the file names the version (`/* vi-climate-cards 0.1.0+<git rev> */`);
-  deploy only committed builds (no `.dirty`).
-- The bundle registers the former names `vi-anlagenschema-card` and
-  `vi-kaeltekreis-card` as aliases, so dashboards keep working while their
-  card types are switched to the new names.
+- The cards are installed in the user's Home Assistant through HACS (since
+  2026-11-09, custom repository `ignazhabibi/vi-climate-cards`, repository id
+  `1451383529`). HACS installs the release asset `vi-climate-cards.js` and
+  registers the dashboard resource itself
+  (`/local/community/vi-climate-cards/vi-climate-cards.js?v=…`). No SSH, no
+  `scp`, no manual resource. Never create a second resource for the cards: a
+  double registration defines the elements twice.
+- Release flow: commit, push, then tag `vX.Y.Z` and push the tag. The
+  workflow `.github/workflows/release.yml` runs `npm run check` and creates
+  the GitHub release with `dist/vi-climate-cards.js` as asset. Set the
+  version in `package.json` first. Release only when the user asks; use a
+  dash in the tag (`v0.2.0-beta.1`) only for pre-releases, which HACS ignores
+  by default. Push and tag only when the user asks.
+- Update in Home Assistant through the HA MCP (`ha_manage_hacs`, called via
+  `ha_call_write_tool`): `update_information` with the repository id to
+  surface the new release, then `download` with `repository_id` and the
+  `version` tag. Then reload the dashboard in the browser (clear the cache).
+  Check the installed version with `ha_get_hacs_info` (`action=info`) and the
+  banner line of the served file.
+- To try an uncommitted change on the real instance there is no deploy path
+  any more; check it with the test page (Verification) and release it.
 - Dashboard edits go through the HA MCP tools (`ha_config_get_dashboard`, then
   `ha_config_set_dashboard` with `python_transform` and the current
   `config_hash`). The server runs in strict best-practices mode: read the
@@ -188,6 +185,7 @@ never enter credentials yourself.
 
 ## Git
 
-The repository was initialised on 2026-10-19 (branch `main`, no remote yet).
-Commit only when the user asks. Do not push or add a remote unless the user
-asks.
+Branch `main`, remote `origin` is `github.com/ignazhabibi/vi-climate-cards`
+(public since 2026-11-09). Commit only when the user asks. Do not push or tag
+unless the user asks. The repository is public: keep local paths, addresses,
+and credentials out of commits.

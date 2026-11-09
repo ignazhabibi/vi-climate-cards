@@ -33,6 +33,10 @@ integration, which provides the live values.
   and both expansion valves. The flow pattern shows the refrigerant state
   (gas, liquid, droplets behind the valve); in defrost the circuit reverses.
 
+| Hydraulic card | Refrigerant card |
+| --- | --- |
+| ![Hydraulic card: outdoor unit, indoor unit, buffer and DHW tank](docs/images/hydraulic-card.png) | ![Refrigerant card: refrigerant circuit of the outdoor unit](docs/images/refrigerant-card.png) |
+
 Both cards are one JavaScript file without runtime dependencies. They use the Home
 Assistant theme variables, so light and dark mode follow the HA theme; the
 device bodies take their tint from the theme's text and card colors. Card

@@ -25,4 +25,5 @@ jobs:
           flags=""
           case "$GITHUB_REF_NAME" in *-*) flags="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" dist/vi-climate-cards.js \
-            --title "$GITHUB_REF_NAME" --generate-notes $flags
+            --title "$GITHUB_REF_NAME" --generate-notes $flags \
+            --notes "**Proof of concept.** Supports only the Viessmann Vitocal 250-A with the hydraulic layout described in the README, through the vi_climate_devices integration. Everything else is untested."

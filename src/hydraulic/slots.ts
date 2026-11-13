@@ -63,7 +63,7 @@ export const HYDRAULIC_SLOTS: Slot[] = [
     key: "dhw",
     label: P.dhw,
     domain: "sensor",
-    feature: "heating.dhw.sensors.temperature.hotWaterStorage",
+    feature: "heating.dhw.sensors.temperature.dhwCylinder",
   },
   {
     key: "circulation_pump",

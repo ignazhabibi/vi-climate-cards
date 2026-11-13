@@ -1,6 +1,6 @@
 {
   "name": "vi-climate-cards",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Home Assistant dashboard cards for Viessmann heat pumps: hydraulic schematic and refrigerant circuit",
   "type": "module",

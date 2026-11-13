@@ -29,7 +29,7 @@ const vitocal: Row[] = [
   ["sensor.e3_vitocal_16_vorlauf_heizkreis_0", "heating.circuits.0.sensors.temperature.supply"],
   ["binary_sensor.e3_vitocal_16_heizkreispumpe_heizkreis_0", "heating.circuits.0.circulation.pump.status"],
   ["sensor.e3_vitocal_16_pufferspeichertemperatur", "heating.bufferCylinder.sensors.temperature.main"],
-  ["sensor.e3_vitocal_16_warmwassertemperatur", "heating.dhw.sensors.temperature.hotWaterStorage"],
+  ["sensor.e3_vitocal_16_warmwassertemperatur", "heating.dhw.sensors.temperature.dhwCylinder"],
   ["binary_sensor.e3_vitocal_16_zirkulationspumpe_warmwasser", "heating.dhw.pumps.circulation.status"],
   ["water_heater.e3_vitocal_16_warmwasser", undefined, "dhw_water_heater"],
   ["climate.warmepumpe_heizkreis_0", undefined, "heating_circuit"],
